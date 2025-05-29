@@ -1,0 +1,6 @@
+../Core/Src/Services/limit_switch_service.c:35:13:ls_open_exti_handler	24	static
+../Core/Src/Services/limit_switch_service.c:50:13:ls_closed_exti_handler	24	static
+../Core/Src/Services/limit_switch_service.c:60:6:LimitSwitchService_Init	40	static
+../Core/Src/Services/limit_switch_service.c:93:6:LimitSwitchService_ProcessDebounce	24	static
+../Core/Src/Services/limit_switch_service.c:122:6:LimitSwitchService_IsDoorFullyOpen	16	static,ignoring_inline_asm
+../Core/Src/Services/limit_switch_service.c:134:6:LimitSwitchService_IsDoorFullyClosed	16	static,ignoring_inline_asm

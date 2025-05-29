@@ -1,0 +1,4 @@
+../Core/Src/Services/pir__sensor_service.c:23:13:pir1_exti_event_handler	2
+../Core/Src/Services/pir__sensor_service.c:43:13:pir2_exti_event_handler	2
+../Core/Src/Services/pir__sensor_service.c:51:6:PIRService_Init	1
+../Core/Src/Services/pir__sensor_service.c:86:6:PIRService_IsMotionDetected	2

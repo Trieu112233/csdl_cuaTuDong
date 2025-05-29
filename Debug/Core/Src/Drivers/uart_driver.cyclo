@@ -1,0 +1,9 @@
+../Drivers/CMSIS/Include/core_cm4.h:1684:22:__NVIC_EnableIRQ	2
+../Drivers/CMSIS/Include/core_cm4.h:1814:22:__NVIC_SetPriority	2
+../Core/Src/Drivers/uart_driver.c:27:6:UART2_Init	1
+../Core/Src/Drivers/uart_driver.c:78:6:UART2_SendBuffer_IT	5
+../Core/Src/Drivers/uart_driver.c:103:6:UART2_IsTxBusy	1
+../Core/Src/Drivers/uart_driver.c:107:6:UART2_ReadByte_FromBuffer	2
+../Core/Src/Drivers/uart_driver.c:121:10:UART2_GetRxBufferCount	1
+../Core/Src/Drivers/uart_driver.c:126:6:UART2_RegisterTxCompleteCallback	1
+../Core/Src/Drivers/uart_driver.c:130:6:USART2_IRQHandler	12

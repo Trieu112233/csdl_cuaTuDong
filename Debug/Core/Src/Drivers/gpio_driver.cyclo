@@ -1,0 +1,5 @@
+../Core/Src/Drivers/gpio_driver.c:11:6:GPIO_ClockCmd	13
+../Core/Src/Drivers/gpio_driver.c:31:6:GPIO_InitPin	7
+../Core/Src/Drivers/gpio_driver.c:87:9:GPIO_ReadPin	2
+../Core/Src/Drivers/gpio_driver.c:95:6:GPIO_WritePin	2
+../Core/Src/Drivers/gpio_driver.c:103:6:GPIO_TogglePin	1

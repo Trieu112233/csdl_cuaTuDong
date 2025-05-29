@@ -1,0 +1,10 @@
+../Core/Src/Services/uart_protocol_service.c:51:6:UARTProto_Init	16	static
+../Core/Src/Services/uart_protocol_service.c:58:13:UARTProto_TxDoneCallback	8	static
+../Core/Src/Services/uart_protocol_service.c:68:13:actually_send_frame	32	static
+../Core/Src/Services/uart_protocol_service.c:92:6:UARTProto_SendFrameWithAck	16	static
+../Core/Src/Services/uart_protocol_service.c:119:13:reset_rx_parser	4	static
+../Core/Src/Services/uart_protocol_service.c:125:13:process_received_frame_logic	16	static
+../Core/Src/Services/uart_protocol_service.c:176:6:UARTProto_Process	16	static
+../Core/Src/Services/uart_protocol_service.c:272:13:send_ack	24	static
+../Core/Src/Services/uart_protocol_service.c:278:13:send_nack	24	static
+../Core/Src/Services/uart_protocol_service.c:285:9:UARTProto_GetNextTxFrameID	16	static
