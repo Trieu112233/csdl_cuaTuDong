@@ -63,4 +63,23 @@ void UART2_RegisterTxCompleteCallback(uart_tx_complete_callback_t callback);
 
 void USART2_IRQHandler(void);
 
+/**
+ * @brief Trả về cờ lỗi hiện tại của UART
+ * @return Bitmask các lỗi UART hiện tại
+ */
+uint8_t UART2_GetErrorFlags(void);
+
+/**
+ * @brief Xóa các cờ lỗi UART đã chỉ định
+ * @param flags: Bitmask các lỗi cần xóa
+ */
+void UART2_ClearErrorFlags(uint8_t flags);
+
+// Định nghĩa mã lỗi UART
+#define UART_ERROR_OVERRUN      (1 << 0)  // Lỗi Overrun
+#define UART_ERROR_NOISE        (1 << 1)  // Lỗi nhiễu trên đường truyền
+#define UART_ERROR_FRAMING      (1 << 2)  // Lỗi framing
+#define UART_ERROR_PARITY       (1 << 3)  // Lỗi chẵn lẻ
+#define UART_ERROR_BUFFER_FULL  (1 << 4)  // Buffer RX đầy
+
 #endif /* INC_DRIVERS_UART_DRIVER_H_ */

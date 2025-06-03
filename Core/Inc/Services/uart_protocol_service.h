@@ -74,4 +74,11 @@ void UARTProto_Process(void);
  */
 uint8_t UARTProto_GetNextTxFrameID(void);
 
+/**
+ * @brief Kiểm tra các lỗi UART và xử lý nếu cần thiết
+ * @return true nếu phát hiện có lỗi, false nếu không có lỗi nào
+ * @note Hàm này sẽ tự động xóa các cờ lỗi sau khi xử lý
+ */
+bool UARTProto_CheckErrors(void);
+
 #endif /* INC_SERVICES_UART_PROTOCOL_SERVICE_H_ */

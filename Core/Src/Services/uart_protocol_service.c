@@ -158,7 +158,9 @@ static void process_received_frame_logic(void) {
                          actually_send_frame(g_last_sent_frame_type_ack, g_last_sent_frame_id_ack,
                                         g_last_sent_payload_ack, g_last_sent_length_ack);
                     } else {
-                         g_send_retry_count--;
+                         // Không giảm g_send_retry_count, thay vào đó đặt một cờ để thử lại sau
+                         // Thiết lập lại timeout để thử lại sau một khoảng thời gian
+                         g_ack_timeout_start_tick = GetTick() - (ACK_TIMEOUT_MS / 2);
                     }
                 } else {
                     g_waiting_for_ack = false;
@@ -244,12 +246,21 @@ void UARTProto_Process(void) {
     // Xử lý timeout ACK
     if (g_waiting_for_ack && (GetTick() - g_ack_timeout_start_tick >= ACK_TIMEOUT_MS)) {
         if (UART2_IsTxBusy()) {
-            // Nếu UART vẫn đang bận gửi lần cuối (ví dụ, do ngắt bị ưu tiên thấp),
-            // cho thêm chút thời gian.
-            g_ack_timeout_start_tick = GetTick(); // Reset timeout
+            // Nếu UART vẫn đang bận, cho thêm thời gian nhưng có giới hạn
+            // Chỉ reset timeout một lần để tránh bị treo vô hạn
+            static uint8_t timeout_extension_count = 0;
+            if (timeout_extension_count < 3) { // Giới hạn số lần gia hạn timeout
+                g_ack_timeout_start_tick = GetTick();
+                timeout_extension_count++;
+            } else {
+                // Đã cho đủ thời gian extension, tiếp tục xử lý như bình thường
+                g_send_retry_count++;
+                timeout_extension_count = 0;
+            }
             return;
         }
 
+        timeout_extension_count = 0; // Reset biến đếm khi không còn trong trạng thái bận
         g_send_retry_count++;
         if (g_send_retry_count <= MAX_SEND_RETRIES) {
             // Gửi lại frame
@@ -284,10 +295,37 @@ static void send_nack(uint8_t for_frame_id) {
 // Hàm lấy ID cho frame gửi đi từ STM32 (ví dụ STATUS_UPDATE)
 uint8_t UARTProto_GetNextTxFrameID(void) {
     uint8_t id = g_next_stm_frame_id++;
-    if (g_next_stm_frame_id < 0x80) {
-    	g_next_stm_frame_id = 0x80;
+    
+    // Kiểm tra nếu ID vượt quá 0xFF hoặc quay về dưới 0x80
+    if (g_next_stm_frame_id > 0xFF || g_next_stm_frame_id < 0x80) {
+        g_next_stm_frame_id = 0x80; // Reset về 0x80, vùng ID dành cho STM32
     }
+    
     return id;
+}
+
+// Hàm kiểm tra lỗi UART và xử lý nếu cần thiết
+bool UARTProto_CheckErrors(void) {
+    uint8_t errors = UART2_GetErrorFlags();
+    bool has_errors = (errors != 0);
+    
+    if (has_errors) {
+        // Xử lý các lỗi nếu cần
+        if (errors & UART_ERROR_BUFFER_FULL) {
+            // Buffer đầy có thể yêu cầu reset trạng thái của protocol
+            reset_rx_parser();
+        }
+        
+        if (errors & (UART_ERROR_OVERRUN | UART_ERROR_FRAMING | UART_ERROR_NOISE | UART_ERROR_PARITY)) {
+            // Các lỗi phần cứng UART có thể yêu cầu reset hoặc thông báo
+            // Có thể tùy chỉnh xử lý cho từng loại lỗi
+        }
+        
+        // Xóa các cờ lỗi đã xử lý
+        UART2_ClearErrorFlags(errors);
+    }
+    
+    return has_errors;
 }
 
 
