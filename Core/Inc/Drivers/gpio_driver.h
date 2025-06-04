@@ -8,7 +8,7 @@
 #ifndef INC_DRIVERS_GPIO_DRIVER_H_
 #define INC_DRIVERS_GPIO_DRIVER_H_
 
-#include "stm32f401xe.h" // Hoặc stm32f4xx.h tùy cấu hình project
+#include "stm32f401xe.h"
 #include <stdint.h>
 
 // GPIO Modes

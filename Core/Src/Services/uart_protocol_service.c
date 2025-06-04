@@ -7,8 +7,8 @@
 
 #include "uart_protocol_service.h"
 #include "uart_driver.h"
-#include "systick_driver.h"
-#include <string.h>
+#include "systick_driver.h" // For GetTick()
+#include <string.h> // For memcpy
 
 typedef enum {
     STATE_WAIT_START,
@@ -20,56 +20,26 @@ typedef enum {
 } RxState_t;
 
 static RxState_t 		g_rx_state = STATE_WAIT_START;
-static uint8_t 			g_rx_buffer[MAX_FRAME_LENGTH]; // Buffer tạm để xây dựng frame nhận được
+static uint8_t 			g_rx_buffer[MAX_FRAME_LENGTH]; // Buffer for assembling raw incoming frame bytes
 static uint8_t 			g_rx_buffer_idx = 0;
-static ParsedFrame_t 	g_current_rx_frame; // Frame đang được xây dựng
+static ParsedFrame_t 	g_current_rx_frame;    // Holds the currently parsed frame data
 static uint8_t 			g_expected_payload_len = 0;
 
-// --- Trạng thái cho việc gửi frame và chờ ACK ---
-static bool 		g_waiting_for_ack = false;
-static uint8_t 		g_last_sent_frame_id_ack;//id cuar frame đang chờ ack
-static FrameType_t 	g_last_sent_frame_type_ack;
-static uint8_t 		g_last_sent_length_ack;
-static uint8_t		g_last_sent_payload_ack[MAX_PAYLOAD_LENGTH];
-static uint8_t 		g_send_retry_count = 0;
-static uint32_t 	g_ack_timeout_start_tick = 0;
-
-// --- Callback cho lớp Application ---
 static uart_command_handler_callback_t g_app_command_callback = NULL;
 
-// --- ID cho frame gửi đi tiếp theo (STM32 -> LabVIEW) ---
-static uint8_t g_next_stm_frame_id = 0x00; // Bắt đầu từ 0x80 để phân biệt với ID từ LabVIEW (nếu cần)
-
-// --- Forward declarations of static helper functions ---
+// Forward declarations of static helper functions
 static void reset_rx_parser(void);
 static void process_received_frame_logic(void);
-static void send_ack(uint8_t for_frame_id);
-static void send_nack(uint8_t for_frame_id);
 static bool actually_send_frame(FrameType_t type, uint8_t id, const uint8_t* payload, uint8_t length);
-static void UARTProto_TxDoneCallback(void);
 
-void UARTProto_Init(uart_command_handler_callback_t command_callback) { // Kiểu callback đã đổi
+void UARTProto_Init(uart_command_handler_callback_t command_callback) {
     g_app_command_callback = command_callback;
     reset_rx_parser();
-    g_waiting_for_ack = false;
-    UART2_RegisterTxCompleteCallback(UARTProto_TxDoneCallback);
-}
-
-static void UARTProto_TxDoneCallback(void) {
-    // Hàm này được gọi bởi UART Driver khi buffer TX đã được gửi hoàn toàn.
-    // Nếu chúng ta đang chờ ACK cho frame vừa gửi, đây là lúc bắt đầu timer timeout.
-    if (g_waiting_for_ack && g_send_retry_count == 0) { // Chỉ bắt đầu timeout cho lần gửi đầu tiên
-        g_ack_timeout_start_tick = GetTick();
-    } else if (g_waiting_for_ack && g_send_retry_count > 0) { // Đang gửi lại
-        g_ack_timeout_start_tick = GetTick(); // Reset timeout cho lần gửi lại
-    }
 }
 
 static bool actually_send_frame(FrameType_t type, uint8_t id, const uint8_t* payload, uint8_t length) {
-    if (length > MAX_PAYLOAD_LENGTH) return false; // Payload quá dài
-    if (UART2_IsTxBusy() && type != FRAME_TYPE_ACK && type != FRAME_TYPE_NACK) {
-        // Nếu đang bận gửi frame DATA, không cho gửi frame DATA mới,
-        // nhưng vẫn cho phép gửi ACK/NACK (ACK/NACK không cần cơ chế ACK ngược lại)
+    // This check is redundant if UARTProto_SendFrame also checks, but harmless.
+    if (length > MAX_PAYLOAD_LENGTH) {
         return false;
     }
 
@@ -80,6 +50,7 @@ static bool actually_send_frame(FrameType_t type, uint8_t id, const uint8_t* pay
     frame_buffer[frame_idx++] = (uint8_t)type;
     frame_buffer[frame_idx++] = id;
     frame_buffer[frame_idx++] = length;
+
     if (length > 0 && payload != NULL) {
         memcpy(&frame_buffer[frame_idx], payload, length);
         frame_idx += length;
@@ -89,31 +60,11 @@ static bool actually_send_frame(FrameType_t type, uint8_t id, const uint8_t* pay
     return UART2_SendBuffer_IT(frame_buffer, frame_idx);
 }
 
-bool UARTProto_SendFrameWithAck(FrameType_t type, uint8_t id, const uint8_t* payload, uint8_t length) {
-    if (g_waiting_for_ack) { // Nếu đang chờ ACK cho frame trước, không gửi frame mới (cần ACK)
-        return false;
-    }
-
+bool UARTProto_SendFrame(FrameType_t type, uint8_t id, const uint8_t* payload, uint8_t length) {
     if (length > MAX_PAYLOAD_LENGTH) {
-    	return false;
+        return false; // Payload too long
     }
-
-    g_last_sent_frame_id_ack = id;
-    g_last_sent_frame_type_ack = type;
-    g_last_sent_length_ack = length;
-    if(length > 0 && payload != NULL){
-    	memcpy(g_last_sent_payload_ack, payload, length);
-    } else if (length == 0){
-        memset(g_last_sent_payload_ack, 0, MAX_PAYLOAD_LENGTH);
-    }
-    g_send_retry_count = 0;
-    g_waiting_for_ack = true;
-    if (actually_send_frame(type, id, payload, length)) {
-    	return true;
-    } else {
-    	g_waiting_for_ack = false;
-    	return false;
-    }
+    return actually_send_frame(type, id, payload, length);
 }
 
 static void reset_rx_parser(void) {
@@ -123,92 +74,90 @@ static void reset_rx_parser(void) {
 }
 
 static void process_received_frame_logic(void) {
-    bool command_processed_ok = false;
+    // This function is called when a complete, structurally valid frame
+    // of type FRAME_TYPE_LABVIEW_TO_STM has been received.
+    // Frame data is in g_current_rx_frame.
 
-    switch (g_current_rx_frame.type) {
-        case FRAME_TYPE_CMD_SET_MODE:
-        case FRAME_TYPE_CMD_RESET_COUNT:
-            if (g_app_command_callback != NULL) {
-                command_processed_ok = g_app_command_callback(&g_current_rx_frame);
-            } else {
-                command_processed_ok = false; // Không có handler
-            }
+    // Only expect to process commands from LabVIEW.
+    if (g_current_rx_frame.type != FRAME_TYPE_LABVIEW_TO_STM) {
+        return; 
+    }
 
-            if (command_processed_ok) {
-                send_ack(g_current_rx_frame.id);
-            } else {
-                send_nack(g_current_rx_frame.id); // <<<< KHÔNG CẦN MÃ LỖI
-            }
-            break;
-
-        case FRAME_TYPE_ACK:
-            if (g_waiting_for_ack && g_current_rx_frame.length == 1 &&
-                g_current_rx_frame.payload[0] == g_last_sent_frame_id_ack) {
-                g_waiting_for_ack = false;
-                g_send_retry_count = 0;
-            }
-            break;
-
-        case FRAME_TYPE_NACK:
-            if (g_waiting_for_ack && g_current_rx_frame.length == 1 && // NACK giờ chỉ có ID
-                g_current_rx_frame.payload[0] == g_last_sent_frame_id_ack) {
-                g_send_retry_count++;
-                if (g_send_retry_count <= MAX_SEND_RETRIES) {
-                    if (!UART2_IsTxBusy()) {
-                         actually_send_frame(g_last_sent_frame_type_ack, g_last_sent_frame_id_ack,
-                                        g_last_sent_payload_ack, g_last_sent_length_ack);
-                    } else {
-                         // Không giảm g_send_retry_count, thay vào đó đặt một cờ để thử lại sau
-                         // Thiết lập lại timeout để thử lại sau một khoảng thời gian
-                         g_ack_timeout_start_tick = GetTick() - (ACK_TIMEOUT_MS / 2);
-                    }
-                } else {
-                    g_waiting_for_ack = false;
-                    // TODO: Báo lỗi Application
+    switch (g_current_rx_frame.id) {
+        case FRAME_ID_LABVIEW_SET_MODE:
+            if (g_current_rx_frame.length == 1) {
+                if (g_app_command_callback != NULL) {
+                    // Let the application handler process the command.
+                    // The callback's return value is for the app's use.
+                    g_app_command_callback(&g_current_rx_frame);
                 }
+            } else {
+                // Invalid payload length for SET_MODE. Silently ignore or log if needed.
             }
             break;
 
-        default: // Lỗi: Type không xác định từ LabVIEW
-            send_nack(g_current_rx_frame.id); // <<<< KHÔNG CẦN MÃ LỖI
+        case FRAME_ID_LABVIEW_RESET_COUNT:
+            // Validate payload length
+            if (g_current_rx_frame.length == 0) {
+                if (g_app_command_callback != NULL) {
+                    g_app_command_callback(&g_current_rx_frame);
+                }
+            } else {
+                // Invalid payload length for RESET_COUNT. Silently ignore or log.
+            }
+            break;
+
+        default:
+            // Unknown command ID received from LabVIEW. Silently ignore or log.
             break;
     }
+    // No ACK or NACK is sent.
 }
 
 void UARTProto_Process(void) {
     uint8_t byte;
-    while (UART2_ReadByte_FromBuffer(&byte)) { // Đọc tất cả byte có trong buffer RX của driver
+    while (UART2_ReadByte_FromBuffer(&byte)) {
+        // Prevent buffer overflow if a malformed frame is too long
+        if (g_rx_state != STATE_WAIT_START && g_rx_buffer_idx >= MAX_FRAME_LENGTH) {
+            reset_rx_parser();
+            // After reset, the current 'byte' might be a START_BYTE
+        }
+
         switch (g_rx_state) {
             case STATE_WAIT_START:
                 if (byte == FRAME_START_BYTE) {
-                    g_rx_buffer_idx = 0;
+                    // g_rx_buffer_idx is 0 due to reset_rx_parser()
                     g_rx_buffer[g_rx_buffer_idx++] = byte;
                     g_rx_state = STATE_WAIT_TYPE;
                 }
                 break;
 
             case STATE_WAIT_TYPE:
-                g_rx_buffer[g_rx_buffer_idx++] = byte;
                 g_current_rx_frame.type = (FrameType_t)byte;
-                g_rx_state = STATE_WAIT_ID;
+                g_rx_buffer[g_rx_buffer_idx++] = byte;
+                if (g_current_rx_frame.type == FRAME_TYPE_LABVIEW_TO_STM) {
+                    g_rx_state = STATE_WAIT_ID;
+                } else {
+                    // Received an unexpected frame type (e.g., STM_TO_LABVIEW type, or invalid)
+                    reset_rx_parser();
+                }
                 break;
 
             case STATE_WAIT_ID:
-                g_rx_buffer[g_rx_buffer_idx++] = byte;
                 g_current_rx_frame.id = byte;
+                g_rx_buffer[g_rx_buffer_idx++] = byte;
                 g_rx_state = STATE_WAIT_LENGTH;
                 break;
 
             case STATE_WAIT_LENGTH:
-                g_rx_buffer[g_rx_buffer_idx++] = byte;
-                if (byte > MAX_PAYLOAD_LENGTH) { // Kiểm tra độ dài payload
-                	send_nack(g_current_rx_frame.id);
-                    reset_rx_parser(); // Lỗi, payload quá dài
+                if (byte > MAX_PAYLOAD_LENGTH) {
+                    reset_rx_parser(); // Error: payload length field is too large
                 } else {
                     g_current_rx_frame.length = byte;
                     g_expected_payload_len = byte;
+                    g_rx_buffer[g_rx_buffer_idx++] = byte;
                     if (g_expected_payload_len == 0) {
-                        g_rx_state = STATE_WAIT_END;
+                        g_rx_state = STATE_WAIT_END; // Skip payload if length is 0
                     } else {
                         g_rx_state = STATE_WAIT_PAYLOAD;
                     }
@@ -216,115 +165,59 @@ void UARTProto_Process(void) {
                 break;
 
             case STATE_WAIT_PAYLOAD:
-                g_rx_buffer[g_rx_buffer_idx++] = byte;
-                g_current_rx_frame.payload[g_rx_buffer_idx - (FRAME_OVERHEAD -1 /*END*/)] = byte; // -1 vì END chưa có
-                if ((g_rx_buffer_idx - (FRAME_OVERHEAD -1)) >= g_expected_payload_len) {
-                    g_rx_state = STATE_WAIT_END;
+                // Current payload byte's 0-based index in the payload array.
+                // Header (START,TYPE,ID,LENGTH) is 4 bytes.
+                // g_rx_buffer_idx is count of bytes in g_rx_buffer *before* adding current 'byte'.
+                uint8_t payload_byte_index = g_rx_buffer_idx - 4;
+
+                // Ensure we don't write past allocated payload buffer, though g_expected_payload_len should protect this.
+                if (payload_byte_index < MAX_PAYLOAD_LENGTH) {
+                     g_current_rx_frame.payload[payload_byte_index] = byte;
+                }
+                g_rx_buffer[g_rx_buffer_idx++] = byte; // Store current payload byte in raw buffer
+
+                if ((payload_byte_index + 1) >= g_expected_payload_len) {
+                    g_rx_state = STATE_WAIT_END; // All expected payload bytes received
                 }
                 break;
 
             case STATE_WAIT_END:
-                g_rx_buffer[g_rx_buffer_idx++] = byte;
                 if (byte == FRAME_END_BYTE) {
-                	process_received_frame_logic();
+                    // Frame is structurally complete.
+                    // g_rx_buffer_idx is count of (START,TYPE,ID,LENGTH,PAYLOAD bytes).
+                    // Expected count = 4 + g_current_rx_frame.length.
+                    if (g_rx_buffer_idx == (4 + g_current_rx_frame.length)) {
+                        // Only process if it's a command from LabVIEW (already checked at TYPE stage)
+                        if (g_current_rx_frame.type == FRAME_TYPE_LABVIEW_TO_STM) {
+                            process_received_frame_logic();
+                        }
+                    } else {
+                        // Error: Frame length mismatch. Reset parser.
+                        reset_rx_parser();
+                    }
                 } else {
-                	send_nack(g_current_rx_frame.id);
+                    // Error: Expected FRAME_END_BYTE but received something else.
                 }
-                reset_rx_parser();
+                reset_rx_parser(); // Always reset for the next frame, regardless of END byte correctness.
                 break;
 
-            default:
+            default: 
                 reset_rx_parser();
                 break;
         }
-        if (g_rx_buffer_idx >= MAX_FRAME_LENGTH && g_rx_state != STATE_WAIT_START) {
-            // Tránh tràn buffer nếu frame lỗi không có END byte
-            reset_rx_parser();
-        }
-    }
-
-    // Xử lý timeout ACK
-    if (g_waiting_for_ack && (GetTick() - g_ack_timeout_start_tick >= ACK_TIMEOUT_MS)) {
-        static uint8_t timeout_extension_count = 0;
-    	if (UART2_IsTxBusy()) {
-            // Nếu UART vẫn đang bận, cho thêm thời gian nhưng có giới hạn
-            // Chỉ reset timeout một lần để tránh bị treo vô hạn
-            if (timeout_extension_count < 3) { // Giới hạn số lần gia hạn timeout
-                g_ack_timeout_start_tick = GetTick();
-                timeout_extension_count++;
-            } else {
-                // Đã cho đủ thời gian extension, tiếp tục xử lý như bình thường
-                g_send_retry_count++;
-                timeout_extension_count = 0;
-            }
-            return;
-        }
-
-        timeout_extension_count = 0; // Reset biến đếm khi không còn trong trạng thái bận
-        g_send_retry_count++;
-        if (g_send_retry_count <= MAX_SEND_RETRIES) {
-            // Gửi lại frame
-            if(!UART2_IsTxBusy()){
-                 actually_send_frame(g_last_sent_frame_type_ack, g_last_sent_frame_id_ack,
-                                g_last_sent_payload_ack, g_last_sent_length_ack);
-                 // g_ack_timeout_start_tick sẽ được set trong callback TxDone
-            } else {
-                 // UART vẫn đang bận, có thể chờ hoặc xử lý khác
-                 // Tạm thời coi như mất lượt retry này để tránh block
-            }
-        } else {
-            g_waiting_for_ack = false; // Quá số lần thử
-            // TODO: Báo lỗi "Không nhận được ACK sau nhiều lần thử" lên lớp Application
-            // Ví dụ: if (g_app_ack_fail_callback) g_app_ack_fail_callback(g_last_sent_frame_id_ack);
-        }
     }
 }
 
-static void send_ack(uint8_t for_frame_id) {
-	uint8_t ack_id = UARTProto_GetNextTxFrameID();
-	uint8_t ack_payload[1] = {for_frame_id};
-	actually_send_frame(FRAME_TYPE_ACK, ack_id, ack_payload, 1);
-}
-
-static void send_nack(uint8_t for_frame_id) {
-	uint8_t nack_id = UARTProto_GetNextTxFrameID();
-    uint8_t nack_payload[1] = {for_frame_id};
-    actually_send_frame(FRAME_TYPE_NACK, nack_id, nack_payload, 1); // Payload length là 1
-}
-
-// Hàm lấy ID cho frame gửi đi từ STM32
-uint8_t UARTProto_GetNextTxFrameID(void) {
-    uint8_t id = g_next_stm_frame_id++;
-    
-    // Kiểm tra nếu ID vượt quá 0x7F
-    if (g_next_stm_frame_id > 0x7F) {
-        g_next_stm_frame_id = 0x00; // Reset về 0x00, vùng ID dành cho STM32
-    }
-    
-    return id;
-}
-
-// Hàm kiểm tra lỗi UART và xử lý nếu cần thiết
 bool UARTProto_CheckErrors(void) {
     uint8_t errors = UART2_GetErrorFlags();
     bool has_errors = (errors != 0);
-    
+
     if (has_errors) {
-        // Xử lý các lỗi nếu cần
         if (errors & UART_ERROR_BUFFER_FULL) {
-            // Buffer đầy có thể yêu cầu reset trạng thái của protocol
             reset_rx_parser();
         }
-        
-        if (errors & (UART_ERROR_OVERRUN | UART_ERROR_FRAMING | UART_ERROR_NOISE | UART_ERROR_PARITY)) {
-            // Các lỗi phần cứng UART có thể yêu cầu reset hoặc thông báo
-            // Có thể tùy chỉnh xử lý cho từng loại lỗi
-        }
-        
-        // Xóa các cờ lỗi đã xử lý
-        UART2_ClearErrorFlags(errors);
+        UART2_ClearErrorFlags(errors); // Clear the reported errors in the driver.
     }
-    
     return has_errors;
 }
 

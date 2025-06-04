@@ -1,2 +1,4 @@
-../Core/Src/Services/motor_control_service.c:12:6:Motor_Init	1
-../Core/Src/Services/motor_control_service.c:19:6:Motor_SetSpeed	3
+../Core/Src/Services/motor_control_service.c:19:6:Motor_Init	1
+../Core/Src/Services/motor_control_service.c:43:6:Motor_SetSpeed	3
+../Core/Src/Services/motor_control_service.c:49:6:Motor_SetDirection	5
+../Core/Src/Services/motor_control_service.c:69:6:Motor_Stop	1
