@@ -190,7 +190,7 @@ void USART2_IRQHandler(void) {
     if ((sr_reg & USART_SR_TC) && (USART2->CR1 & USART_CR1_TCIE)) {
         // Byte cuối cùng đã được gửi hoàn toàn
         USART2->CR1 &= ~USART_CR1_TCIE; // Tắt ngắt TC
-        g_uart2_tx_busy = false;      // Đánh dấu không còn bận gửi
+        g_uart2_tx_busy = false;      // Đánh dấu  không còn bận gửi
 
         if (g_uart2_tx_complete_callback != NULL) {
             g_uart2_tx_complete_callback();

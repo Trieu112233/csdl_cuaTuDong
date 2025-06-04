@@ -21,9 +21,13 @@ typedef enum{
 	FRAME_TYPE_RESERVED         = 0x00,
 	    // Lệnh từ LabVIEW -> STM32
 	FRAME_TYPE_CMD_SET_MODE     = 0x10, // Payload: new_mode (AUTO, FORCE_OPEN, FORCE_CLOSE)
-	FRAME_TYPE_CMD_RESET_COUNT  = 0x11, // Payload: (không có hoặc 0)
+	FRAME_TYPE_CMD_RESET_COUNT  = 0x13, // Payload: (không có hoặc 0)
 	// Trạng thái từ STM32 -> LabVIEW
-	FRAME_TYPE_STATUS_UPDATE    = 0x20, // Payload: door_state, light_state, current_mode, person_count
+	FRAME_TYPE_FULL_SNAPSHOT    = 0x05, // Payload: mode, door, person_count, light
+	FRAME_TYPE_DOOR_STATE		= 0x01,
+	FRAME_TYPE_LIGHT_STATE		= 0x02,
+	FRAME_TYPE_PERSON_COUNT		= 0x03,
+	FRAME_TYPE_SYSTEM_MODE		= 0x04,
 	// ACK/NACK
 	FRAME_TYPE_ACK              = 0x30, // Payload: ID của frame được ACK
 	FRAME_TYPE_NACK             = 0x31  // Payload: ID của frame bị NACK

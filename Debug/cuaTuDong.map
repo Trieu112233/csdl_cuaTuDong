@@ -708,7 +708,7 @@ Discarded input sections
                 0x00000000        0x4 ./Core/Src/Services/uart_protocol_service.o
  .bss.g_app_command_callback
                 0x00000000        0x4 ./Core/Src/Services/uart_protocol_service.o
- .data.g_next_stm_frame_id
+ .bss.g_next_stm_frame_id
                 0x00000000        0x1 ./Core/Src/Services/uart_protocol_service.o
  .text.UARTProto_Init
                 0x00000000       0x34 ./Core/Src/Services/uart_protocol_service.o
@@ -734,7 +734,7 @@ Discarded input sections
                 0x00000000       0x40 ./Core/Src/Services/uart_protocol_service.o
  .bss.timeout_extension_count.0
                 0x00000000        0x1 ./Core/Src/Services/uart_protocol_service.o
- .debug_info    0x00000000      0x60f ./Core/Src/Services/uart_protocol_service.o
+ .debug_info    0x00000000      0x627 ./Core/Src/Services/uart_protocol_service.o
  .debug_abbrev  0x00000000      0x291 ./Core/Src/Services/uart_protocol_service.o
  .debug_aranges
                 0x00000000       0x70 ./Core/Src/Services/uart_protocol_service.o
@@ -783,7 +783,7 @@ Discarded input sections
  .debug_macro   0x00000000       0x35 ./Core/Src/Services/uart_protocol_service.o
  .debug_macro   0x00000000       0x20 ./Core/Src/Services/uart_protocol_service.o
  .debug_line    0x00000000      0xc0c ./Core/Src/Services/uart_protocol_service.o
- .debug_str     0x00000000    0x5334c ./Core/Src/Services/uart_protocol_service.o
+ .debug_str     0x00000000    0x533a8 ./Core/Src/Services/uart_protocol_service.o
  .comment       0x00000000       0x44 ./Core/Src/Services/uart_protocol_service.o
  .debug_frame   0x00000000      0x198 ./Core/Src/Services/uart_protocol_service.o
  .ARM.attributes

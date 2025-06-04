@@ -38,7 +38,7 @@ static uint32_t 	g_ack_timeout_start_tick = 0;
 static uart_command_handler_callback_t g_app_command_callback = NULL;
 
 // --- ID cho frame gửi đi tiếp theo (STM32 -> LabVIEW) ---
-static uint8_t g_next_stm_frame_id = 0x80; // Bắt đầu từ 0x80 để phân biệt với ID từ LabVIEW (nếu cần)
+static uint8_t g_next_stm_frame_id = 0x00; // Bắt đầu từ 0x80 để phân biệt với ID từ LabVIEW (nếu cần)
 
 // --- Forward declarations of static helper functions ---
 static void reset_rx_parser(void);
@@ -94,7 +94,7 @@ bool UARTProto_SendFrameWithAck(FrameType_t type, uint8_t id, const uint8_t* pay
         return false;
     }
 
-    if (length > MAX_PAYLOAD_LENGTH) { // Thêm kiểm tra ở đây nữa cho chắc
+    if (length > MAX_PAYLOAD_LENGTH) {
     	return false;
     }
 
@@ -292,13 +292,13 @@ static void send_nack(uint8_t for_frame_id) {
     actually_send_frame(FRAME_TYPE_NACK, nack_id, nack_payload, 1); // Payload length là 1
 }
 
-// Hàm lấy ID cho frame gửi đi từ STM32 (ví dụ STATUS_UPDATE)
+// Hàm lấy ID cho frame gửi đi từ STM32
 uint8_t UARTProto_GetNextTxFrameID(void) {
     uint8_t id = g_next_stm_frame_id++;
     
-    // Kiểm tra nếu ID vượt quá 0xFF hoặc quay về dưới 0x80
-    if (g_next_stm_frame_id > 0xFF || g_next_stm_frame_id < 0x80) {
-        g_next_stm_frame_id = 0x80; // Reset về 0x80, vùng ID dành cho STM32
+    // Kiểm tra nếu ID vượt quá 0x7F
+    if (g_next_stm_frame_id > 0x7F) {
+        g_next_stm_frame_id = 0x00; // Reset về 0x00, vùng ID dành cho STM32
     }
     
     return id;

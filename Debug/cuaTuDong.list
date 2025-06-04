@@ -2030,7 +2030,7 @@ void USART2_IRQHandler(void) {
  8000f8c:	4a2a      	ldr	r2, [pc, #168]	@ (8001038 <USART2_IRQHandler+0x1c0>)
  8000f8e:	f023 0340 	bic.w	r3, r3, #64	@ 0x40
  8000f92:	60d3      	str	r3, [r2, #12]
-        g_uart2_tx_busy = false;      // Đánh dấu không còn bận gửi
+        g_uart2_tx_busy = false;      // Đánh dấu  không còn bận gửi
  8000f94:	4b30      	ldr	r3, [pc, #192]	@ (8001058 <USART2_IRQHandler+0x1e0>)
  8000f96:	2200      	movs	r2, #0
  8000f98:	701a      	strb	r2, [r3, #0]
