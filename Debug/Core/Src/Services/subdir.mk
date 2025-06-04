@@ -5,18 +5,21 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Core/Src/Services/light_control_service.c \
 ../Core/Src/Services/limit_switch_service.c \
 ../Core/Src/Services/motor_control_service.c \
 ../Core/Src/Services/pir__sensor_service.c \
 ../Core/Src/Services/uart_protocol_service.c 
 
 OBJS += \
+./Core/Src/Services/light_control_service.o \
 ./Core/Src/Services/limit_switch_service.o \
 ./Core/Src/Services/motor_control_service.o \
 ./Core/Src/Services/pir__sensor_service.o \
 ./Core/Src/Services/uart_protocol_service.o 
 
 C_DEPS += \
+./Core/Src/Services/light_control_service.d \
 ./Core/Src/Services/limit_switch_service.d \
 ./Core/Src/Services/motor_control_service.d \
 ./Core/Src/Services/pir__sensor_service.d \
@@ -30,7 +33,7 @@ Core/Src/Services/%.o Core/Src/Services/%.su Core/Src/Services/%.cyclo: ../Core/
 clean: clean-Core-2f-Src-2f-Services
 
 clean-Core-2f-Src-2f-Services:
-	-$(RM) ./Core/Src/Services/limit_switch_service.cyclo ./Core/Src/Services/limit_switch_service.d ./Core/Src/Services/limit_switch_service.o ./Core/Src/Services/limit_switch_service.su ./Core/Src/Services/motor_control_service.cyclo ./Core/Src/Services/motor_control_service.d ./Core/Src/Services/motor_control_service.o ./Core/Src/Services/motor_control_service.su ./Core/Src/Services/pir__sensor_service.cyclo ./Core/Src/Services/pir__sensor_service.d ./Core/Src/Services/pir__sensor_service.o ./Core/Src/Services/pir__sensor_service.su ./Core/Src/Services/uart_protocol_service.cyclo ./Core/Src/Services/uart_protocol_service.d ./Core/Src/Services/uart_protocol_service.o ./Core/Src/Services/uart_protocol_service.su
+	-$(RM) ./Core/Src/Services/light_control_service.cyclo ./Core/Src/Services/light_control_service.d ./Core/Src/Services/light_control_service.o ./Core/Src/Services/light_control_service.su ./Core/Src/Services/limit_switch_service.cyclo ./Core/Src/Services/limit_switch_service.d ./Core/Src/Services/limit_switch_service.o ./Core/Src/Services/limit_switch_service.su ./Core/Src/Services/motor_control_service.cyclo ./Core/Src/Services/motor_control_service.d ./Core/Src/Services/motor_control_service.o ./Core/Src/Services/motor_control_service.su ./Core/Src/Services/pir__sensor_service.cyclo ./Core/Src/Services/pir__sensor_service.d ./Core/Src/Services/pir__sensor_service.o ./Core/Src/Services/pir__sensor_service.su ./Core/Src/Services/uart_protocol_service.cyclo ./Core/Src/Services/uart_protocol_service.d ./Core/Src/Services/uart_protocol_service.o ./Core/Src/Services/uart_protocol_service.su
 
 .PHONY: clean-Core-2f-Src-2f-Services
 
