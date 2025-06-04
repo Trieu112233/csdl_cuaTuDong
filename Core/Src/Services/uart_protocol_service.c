@@ -245,10 +245,10 @@ void UARTProto_Process(void) {
 
     // Xử lý timeout ACK
     if (g_waiting_for_ack && (GetTick() - g_ack_timeout_start_tick >= ACK_TIMEOUT_MS)) {
-        if (UART2_IsTxBusy()) {
+        static uint8_t timeout_extension_count = 0;
+    	if (UART2_IsTxBusy()) {
             // Nếu UART vẫn đang bận, cho thêm thời gian nhưng có giới hạn
             // Chỉ reset timeout một lần để tránh bị treo vô hạn
-            static uint8_t timeout_extension_count = 0;
             if (timeout_extension_count < 3) { // Giới hạn số lần gia hạn timeout
                 g_ack_timeout_start_tick = GetTick();
                 timeout_extension_count++;

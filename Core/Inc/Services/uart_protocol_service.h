@@ -70,7 +70,7 @@ bool UARTProto_SendFrameWithAck(FrameType_t type, uint8_t id, const uint8_t* pay
 void UARTProto_Process(void);
 
 /**
- * @brief Gets the next available Frame ID for STM32 to send. (Giữ nguyên)
+ * @brief Gets the next available Frame ID for STM32 to send.
  */
 uint8_t UARTProto_GetNextTxFrameID(void);
 

@@ -4,7 +4,8 @@
 ../Core/Src/Services/uart_protocol_service.c:92:6:UARTProto_SendFrameWithAck	16	static
 ../Core/Src/Services/uart_protocol_service.c:119:13:reset_rx_parser	4	static
 ../Core/Src/Services/uart_protocol_service.c:125:13:process_received_frame_logic	16	static
-../Core/Src/Services/uart_protocol_service.c:176:6:UARTProto_Process	16	static
-../Core/Src/Services/uart_protocol_service.c:272:13:send_ack	24	static
-../Core/Src/Services/uart_protocol_service.c:278:13:send_nack	24	static
-../Core/Src/Services/uart_protocol_service.c:285:9:UARTProto_GetNextTxFrameID	16	static
+../Core/Src/Services/uart_protocol_service.c:178:6:UARTProto_Process	16	static
+../Core/Src/Services/uart_protocol_service.c:283:13:send_ack	24	static
+../Core/Src/Services/uart_protocol_service.c:289:13:send_nack	24	static
+../Core/Src/Services/uart_protocol_service.c:296:9:UARTProto_GetNextTxFrameID	16	static
+../Core/Src/Services/uart_protocol_service.c:308:6:UARTProto_CheckErrors	16	static

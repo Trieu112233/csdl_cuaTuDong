@@ -1,0 +1,2 @@
+../Core/Src/Services/motor_control_service.c:12:6:Motor_Init	1
+../Core/Src/Services/motor_control_service.c:19:6:Motor_SetSpeed	3

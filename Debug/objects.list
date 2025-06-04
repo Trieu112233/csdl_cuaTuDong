@@ -5,6 +5,7 @@
 "./Core/Src/Drivers/systick_driver.o"
 "./Core/Src/Drivers/uart_driver.o"
 "./Core/Src/Services/limit_switch_service.o"
+"./Core/Src/Services/motor_control_service.o"
 "./Core/Src/Services/pir__sensor_service.o"
 "./Core/Src/Services/uart_protocol_service.o"
 "./Core/Src/main.o"
