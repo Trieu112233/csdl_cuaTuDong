@@ -1,6 +1,9 @@
-Core/Src/main.o: ../Core/Src/main.c \
- C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/systick_driver.h \
- C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/gpio_driver.h \
+Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
+ ../Core/Inc/stm32f4xx_hal_conf.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h \
+ ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h \
  ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f401xe.h \
  ../Drivers/CMSIS/Include/core_cm4.h \
  ../Drivers/CMSIS/Include/cmsis_version.h \
@@ -8,11 +11,33 @@ Core/Src/main.o: ../Core/Src/main.c \
  ../Drivers/CMSIS/Include/cmsis_gcc.h \
  ../Drivers/CMSIS/Include/mpu_armv7.h \
  ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h \
- C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Services/light_control_service.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_exti.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/rcc_config.h \
- C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Services/limit_switch_service.h
-C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/systick_driver.h:
-C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/gpio_driver.h:
+ C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/gpio_driver.h \
+ ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f401xe.h \
+ C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/systick_driver.h \
+ C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/uart_driver.h \
+ C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/rcc_config.h \
+ C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Services/uart_protocol_service.h
+../Core/Inc/main.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
+../Core/Inc/stm32f4xx_hal_conf.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h:
+../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:
 ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f401xe.h:
 ../Drivers/CMSIS/Include/core_cm4.h:
 ../Drivers/CMSIS/Include/cmsis_version.h:
@@ -20,6 +45,24 @@ C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/gpio_dri
 ../Drivers/CMSIS/Include/cmsis_gcc.h:
 ../Drivers/CMSIS/Include/mpu_armv7.h:
 ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h:
-C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Services/light_control_service.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_exti.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
 C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/rcc_config.h:
-C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Services/limit_switch_service.h:
+C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/gpio_driver.h:
+../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f401xe.h:
+C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/systick_driver.h:
+C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/uart_driver.h:
+C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/rcc_config.h:
+C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Services/uart_protocol_service.h:

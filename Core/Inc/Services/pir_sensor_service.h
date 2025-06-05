@@ -14,8 +14,8 @@
 #include "exti_driver.h"
 
 typedef enum {
-    PIR_SENSOR_1 = 0, // Ví dụ: PIR ở lối vào/ngoài
-    PIR_SENSOR_2 = 1, // Ví dụ: PIR ở lối ra/trong
+    PIR_SENSOR_IN = 0, //PIR ở trong
+    PIR_SENSOR_OUT = 1, //PIR ở ngoài
     PIR_SENSOR_COUNT // Số lượng cảm biến PIR
 } PIR_SensorID_t;
 

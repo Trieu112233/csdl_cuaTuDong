@@ -26,19 +26,19 @@ static void pir1_exti_event_handler(uint8_t exti_line) {
     // Và EXTI_TRIGGER_FALLING để báo hiệu kết thúc phát hiện.
     // GPIO_ReadPin trả về 1 (GPIO_PIN_SET) nếu pin đang HIGH.
 
-    if (GPIO_ReadPin(g_pir_configs[PIR_SENSOR_1].port, (1U << g_pir_configs[PIR_SENSOR_1].pin_number)) == GPIO_PIN_SET) {
-        g_pir_motion_detected_state[PIR_SENSOR_1] = true;
+    if (GPIO_ReadPin(g_pir_configs[PIR_SENSOR_IN].port, (1U << g_pir_configs[PIR_SENSOR_IN].pin_number)) == GPIO_PIN_SET) {
+        g_pir_motion_detected_state[PIR_SENSOR_IN] = true;
     } else {
-        g_pir_motion_detected_state[PIR_SENSOR_1] = false;
+        g_pir_motion_detected_state[PIR_SENSOR_IN] = false;
     }
 }
 
 // Callback cho PIR 2
 static void pir2_exti_event_handler(uint8_t exti_line) {
-    if (GPIO_ReadPin(g_pir_configs[PIR_SENSOR_2].port, (1U << g_pir_configs[PIR_SENSOR_2].pin_number)) == GPIO_PIN_SET) {
-        g_pir_motion_detected_state[PIR_SENSOR_2] = true;
+    if (GPIO_ReadPin(g_pir_configs[PIR_SENSOR_OUT].port, (1U << g_pir_configs[PIR_SENSOR_OUT].pin_number)) == GPIO_PIN_SET) {
+        g_pir_motion_detected_state[PIR_SENSOR_OUT] = true;
     } else {
-        g_pir_motion_detected_state[PIR_SENSOR_2] = false;
+        g_pir_motion_detected_state[PIR_SENSOR_OUT] = false;
     }
 }
 
@@ -46,28 +46,28 @@ void PIRService_Init(GPIO_TypeDef* pir1_port, uint8_t pir1_pin_number,
                      GPIO_TypeDef* pir2_port, uint8_t pir2_pin_number,
                      uint8_t nvic_priority) {
     // Lưu cấu hình chân
-    g_pir_configs[PIR_SENSOR_1].port = pir1_port;
-    g_pir_configs[PIR_SENSOR_1].pin_number = pir1_pin_number;
-    g_pir_configs[PIR_SENSOR_1].exti_line = pir1_pin_number; // EXTI line thường trùng pin_number
+    g_pir_configs[PIR_SENSOR_IN].port = pir1_port;
+    g_pir_configs[PIR_SENSOR_IN].pin_number = pir1_pin_number;
+    g_pir_configs[PIR_SENSOR_IN].exti_line = pir1_pin_number; // EXTI line thường trùng pin_number
 
-    g_pir_configs[PIR_SENSOR_2].port = pir2_port;
-    g_pir_configs[PIR_SENSOR_2].pin_number = pir2_pin_number;
-    g_pir_configs[PIR_SENSOR_2].exti_line = pir2_pin_number;
+    g_pir_configs[PIR_SENSOR_OUT].port = pir2_port;
+    g_pir_configs[PIR_SENSOR_OUT].pin_number = pir2_pin_number;
+    g_pir_configs[PIR_SENSOR_OUT].exti_line = pir2_pin_number;
 
     // Reset trạng thái ban đầu
-    g_pir_motion_detected_state[PIR_SENSOR_1] = false;
-    g_pir_motion_detected_state[PIR_SENSOR_2] = false;
+    g_pir_motion_detected_state[PIR_SENSOR_IN] = false;
+    g_pir_motion_detected_state[PIR_SENSOR_OUT] = false;
 
     // Chân GPIO sẽ được EXTI_InitPin cấu hình là input (pull-up là lựa chọn an toàn).
-    EXTI_InitPin(g_pir_configs[PIR_SENSOR_1].port,
-                 g_pir_configs[PIR_SENSOR_1].pin_number,
+    EXTI_InitPin(g_pir_configs[PIR_SENSOR_IN].port,
+                 g_pir_configs[PIR_SENSOR_IN].pin_number,
                  EXTI_TRIGGER_BOTH, // <<<< Sườn lên và xuống
                  nvic_priority,
                  pir1_exti_event_handler);
 
     // Khởi tạo EXTI cho PIR2
-    EXTI_InitPin(g_pir_configs[PIR_SENSOR_2].port,
-                 g_pir_configs[PIR_SENSOR_2].pin_number,
+    EXTI_InitPin(g_pir_configs[PIR_SENSOR_OUT].port,
+                 g_pir_configs[PIR_SENSOR_OUT].pin_number,
                  EXTI_TRIGGER_BOTH, // <<<< Sườn lên và xuống
                  nvic_priority,     // Có thể dùng cùng priority hoặc khác
                  pir2_exti_event_handler);

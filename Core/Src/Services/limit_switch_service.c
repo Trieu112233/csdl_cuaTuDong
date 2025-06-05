@@ -125,7 +125,7 @@ bool LimitSwitchService_IsDoorFullyOpen(void) {
     // và ISR chỉ set cờ, thì việc đọc trực tiếp có thể ổn.
     // Để an toàn, có thể dùng critical section ngắn.
     bool state;
-    __disable_irq(); // Ví dụ critical section
+    __disable_irq(); // critical section
     state = g_limit_switches[LIMIT_SWITCH_ID_DOOR_OPEN].current_stable_state;
     __enable_irq();
     return state;
