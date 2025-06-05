@@ -42,17 +42,17 @@ static void pir2_exti_event_handler(uint8_t exti_line) {
     }
 }
 
-void PIRService_Init(GPIO_TypeDef* pir1_port, uint8_t pir1_pin_number,
-                     GPIO_TypeDef* pir2_port, uint8_t pir2_pin_number,
+void PIRService_Init(GPIO_TypeDef* pir_in_port, uint8_t pir_in_pin_number,
+                     GPIO_TypeDef* pir_out_port, uint8_t pir_out_pin_number,
                      uint8_t nvic_priority) {
     // Lưu cấu hình chân
-    g_pir_configs[PIR_SENSOR_IN].port = pir1_port;
-    g_pir_configs[PIR_SENSOR_IN].pin_number = pir1_pin_number;
-    g_pir_configs[PIR_SENSOR_IN].exti_line = pir1_pin_number; // EXTI line thường trùng pin_number
+    g_pir_configs[PIR_SENSOR_IN].port = pir_in_port;
+    g_pir_configs[PIR_SENSOR_IN].pin_number = pir_in_pin_number;
+    g_pir_configs[PIR_SENSOR_IN].exti_line = pir_in_pin_number; // EXTI line thường trùng pin_number
 
-    g_pir_configs[PIR_SENSOR_OUT].port = pir2_port;
-    g_pir_configs[PIR_SENSOR_OUT].pin_number = pir2_pin_number;
-    g_pir_configs[PIR_SENSOR_OUT].exti_line = pir2_pin_number;
+    g_pir_configs[PIR_SENSOR_OUT].port = pir_out_port;
+    g_pir_configs[PIR_SENSOR_OUT].pin_number = pir_out_pin_number;
+    g_pir_configs[PIR_SENSOR_OUT].exti_line = pir_out_pin_number;
 
     // Reset trạng thái ban đầu
     g_pir_motion_detected_state[PIR_SENSOR_IN] = false;

@@ -1,0 +1,11 @@
+../Core/Src/Applications/door_fsm.c:28:13:change_door_state	16	static
+../Core/Src/Applications/door_fsm.c:37:6:DoorFSM_Init	8	static
+../Core/Src/Applications/door_fsm.c:50:6:DoorFSM_Process	16	static
+../Core/Src/Applications/door_fsm.c:107:13:DoorFSM_GetState	4	static
+../Core/Src/Applications/door_fsm.c:111:6:DoorFSM_NotifySystemModeChange	24	static
+../Core/Src/Applications/door_fsm.c:124:6:DoorFSM_NotifyPersonDetectedPassing	8	static
+../Core/Src/Applications/door_fsm.c:136:13:process_state_closed	16	static
+../Core/Src/Applications/door_fsm.c:146:13:process_state_opening	16	static
+../Core/Src/Applications/door_fsm.c:159:13:process_state_open	24	static
+../Core/Src/Applications/door_fsm.c:179:13:process_state_closing	24	static
+../Core/Src/Applications/door_fsm.c:200:13:process_state_error	16	static

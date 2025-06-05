@@ -1,3 +1,7 @@
+"./Core/Src/Applications/door_fsm.o"
+"./Core/Src/Applications/lighting_logic.o"
+"./Core/Src/Applications/people_counter.o"
+"./Core/Src/Applications/system_manager.o"
 "./Core/Src/Drivers/exti_driver.o"
 "./Core/Src/Drivers/gpio_driver.o"
 "./Core/Src/Drivers/pwm_driver.o"

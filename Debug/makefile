@@ -13,6 +13,7 @@ RM := rm -rf
 -include Core/Startup/subdir.mk
 -include Core/Src/Services/subdir.mk
 -include Core/Src/Drivers/subdir.mk
+-include Core/Src/Applications/subdir.mk
 -include Core/Src/subdir.mk
 -include objects.mk
 

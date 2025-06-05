@@ -38,7 +38,7 @@ typedef enum {
 #define PAYLOAD_DOOR_OPENING        0x01
 #define PAYLOAD_DOOR_OPEN           0x02
 #define PAYLOAD_DOOR_CLOSING        0x03
-#define PAYLOAD_DOOR_BLOCKED        0x04
+#define PAYLOAD_DOOR_ERROR	        0x04
 
 // Common Payload Values for Light State (for FRAME_ID_STM_LIGHT_STATE)
 #define PAYLOAD_LIGHT_OFF           0x00

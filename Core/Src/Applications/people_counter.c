@@ -8,6 +8,7 @@
 #include "people_counter.h"
 #include "pir_sensor_service.h"
 #include "systick_driver.h"
+#include "uart_protocol_service.h"
 
 static volatile int16_t g_person_count = 0;
 
@@ -37,6 +38,8 @@ void PeopleCounter_Init(person_passed_callback_t callback) {
     // Khởi tạo trạng thái PIR ban đầu
     g_pir_outside_last_state = PIRService_IsMotionDetected(PIR_SENSOR_OUT);
     g_pir_inside_last_state = PIRService_IsMotionDetected(PIR_SENSOR_IN);
+
+    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PERSON_COUNT, (uint8_t*)&g_person_count, 1);
 }
 
 void PeopleCounter_Process(void) {
@@ -71,6 +74,7 @@ void PeopleCounter_Process(void) {
         case DETECTION_STATE_EXPECTING_PIR_INSIDE: // PIR_OUTSIDE đã active, chờ PIR_INSIDE
             if (pir_inside_triggered) { // PIR_INSIDE cũng active -> Người vào
                 g_person_count++;
+                UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PERSON_COUNT, (uint8_t*)&g_person_count, 1);
                 g_detection_state = DETECTION_STATE_IDLE;
                 g_last_detection_time = current_tick;
                 if (g_person_passed_cb) g_person_passed_cb(PERSON_PASSED_ENTERED);
@@ -88,6 +92,7 @@ void PeopleCounter_Process(void) {
             if (pir_outside_triggered) { // PIR_OUTSIDE cũng active -> Người ra
                 if (g_person_count > 0) {
                     g_person_count--;
+                    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PERSON_COUNT, (uint8_t*)&g_person_count, 1);
                 }
                 g_detection_state = DETECTION_STATE_IDLE;
                 g_last_detection_time = current_tick;
@@ -115,6 +120,7 @@ void PeopleCounter_Reset(void) {
     // Critical section
     __disable_irq();
     g_person_count = 0;
+    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PERSON_COUNT, (uint8_t*)&g_person_count, 1);
     g_detection_state = DETECTION_STATE_IDLE; // Reset cả máy trạng thái phát hiện
     g_last_detection_time = GetTick(); // Reset cooldown để lệnh reset có hiệu lực ngay
     __enable_irq();
