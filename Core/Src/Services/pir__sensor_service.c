@@ -22,7 +22,7 @@ static PIR_GpioConfig_t g_pir_configs[PIR_SENSOR_COUNT];
 // Callback cho PIR 1
 static void pir1_exti_event_handler(uint8_t exti_line) {
     // Giả định HC-SR501: Output HIGH khi phát hiện, LOW khi không.
-    // Và chúng ta cấu hình EXTI_TRIGGER_RISING để báo hiệu bắt đầu phát hiện.
+    // Cấu hình EXTI_TRIGGER_RISING để báo hiệu bắt đầu phát hiện.
     // Và EXTI_TRIGGER_FALLING để báo hiệu kết thúc phát hiện.
     // GPIO_ReadPin trả về 1 (GPIO_PIN_SET) nếu pin đang HIGH.
 
@@ -31,12 +31,6 @@ static void pir1_exti_event_handler(uint8_t exti_line) {
     } else {
         g_pir_motion_detected_state[PIR_SENSOR_1] = false;
     }
-    // Không cần debouncing phức tạp ở đây vì HC-SR501 có thời gian trễ giữ mức HIGH.
-    // Nếu bạn dùng EXTI_TRIGGER_BOTH, logic trên là đúng.
-    // Nếu chỉ dùng EXTI_TRIGGER_RISING, thì khi callback này được gọi, bạn set true.
-    // Cần một cơ chế khác để set false (ví dụ: timer sau khi hết thời gian giữ của PIR,
-    // hoặc ngắt sườn xuống nếu cấu hình).
-    // Hiện tại, với cấu hình EXTI_TRIGGER_BOTH, logic trên sẽ tự cập nhật.
 }
 
 // Callback cho PIR 2
@@ -64,10 +58,6 @@ void PIRService_Init(GPIO_TypeDef* pir1_port, uint8_t pir1_pin_number,
     g_pir_motion_detected_state[PIR_SENSOR_1] = false;
     g_pir_motion_detected_state[PIR_SENSOR_2] = false;
 
-    // Khởi tạo EXTI cho PIR1
-    // HC-SR501: HIGH khi phát hiện, LOW khi không. Thời gian HIGH có thể điều chỉnh.
-    // Chúng ta muốn biết cả khi bắt đầu phát hiện và khi kết thúc.
-    // Vậy nên dùng EXTI_TRIGGER_BOTH (cả sườn lên và xuống).
     // Chân GPIO sẽ được EXTI_InitPin cấu hình là input (pull-up là lựa chọn an toàn).
     EXTI_InitPin(g_pir_configs[PIR_SENSOR_1].port,
                  g_pir_configs[PIR_SENSOR_1].pin_number,
