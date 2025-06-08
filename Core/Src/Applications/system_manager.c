@@ -18,27 +18,27 @@
 #include "rcc_config.h"
 
 // PIR Sensors
-#define PIR_IN_PORT       GPIOC
-#define PIR_IN_PIN        0
-#define PIR_OUT_PORT       GPIOC
-#define PIR_OUT_PIN        1
-#define PIR_IRQ_PRIO       10
+#define PIR_IN_PORT       		GPIOC
+#define PIR_IN_PIN        		6
+#define PIR_OUT_PORT       		GPIOC
+#define PIR_OUT_PIN        		5
+#define PIR_IRQ_PRIO       		10
 
 // Limit Switches
-#define LS_OPEN_PORT        GPIOB
-#define LS_OPEN_PIN         5
-#define LS_CLOSED_PORT      GPIOB
-#define LS_CLOSED_PIN       6
-#define LS_IRQ_PRIO         11
+#define LS_OPEN_PORT        	GPIOB
+#define LS_OPEN_PIN         	4
+#define LS_CLOSED_PORT      	GPIOB
+#define LS_CLOSED_PIN       	5
+#define LS_IRQ_PRIO         	11
 
-#define MOTOR_DIR1_PORT         GPIOA
-#define MOTOR_DIR1_PIN          0
-#define MOTOR_DIR2_PORT         GPIOA
-#define MOTOR_DIR2_PIN          1
+#define MOTOR_DIR1_PORT         GPIOB
+#define MOTOR_DIR1_PIN          8
+#define MOTOR_DIR2_PORT         GPIOB
+#define MOTOR_DIR2_PIN          9
 
 // Light Control
 #define LIGHT_RELAY_PORT        GPIOA
-#define LIGHT_RELAY_PIN         8 // Ví dụ
+#define LIGHT_RELAY_PIN         9 // Ví dụ
 
 
 static SystemOpMode_t g_system_op_mode = SYSTEM_MODE_NORMAL;

@@ -34,6 +34,11 @@ Mid-level services that provide specific functionality:
 ### Application Layer
 The main application logic is in main.c and integrated with the above services.
 
+1. **system_manager**
+2. **door_fsm**
+3. **lighting_logic**
+4. **people_counter**
+
 ## Communication Protocol
 
 The system communicates with a LabVIEW application using a custom frame-based UART protocol with ACK/NACK mechanism for reliability.
@@ -42,23 +47,27 @@ The system communicates with a LabVIEW application using a custom frame-based UA
 `[START][TYPE][ID][LENGTH][PAYLOAD][END]`
 
 - **START**: Fixed byte (0x7E)
-- **TYPE**: Frame type (commands, status updates, ACK/NACK)
-- **ID**: Unique identifier for the frame
-- **LENGTH**: Length of the payload (0-4 bytes)
+- **TYPE**: Frame type (STM -> LABView, LABView -> STM)
+- **ID**: Frame ID (Door_state, Full_snapshot, Set_mode, ...)
+- **LENGTH**: Length of the payload (0-4)
 - **PAYLOAD**: Data content (up to 4 bytes)
 - **END**: Fixed byte (0x7F)
 
-### Frame Types
+### Frame Type
+- **STM to LABView**: 0x01
+- **LABView to STM**: 0x02
+
+### Frame ID
 - **Commands** (LabVIEW to STM32):
   - SET_MODE (0x10): Change door operation mode (Auto, Force Open, Force Close)
-  - RESET_COUNT (0x11): Reset the people counter to 0
+  - RESET_COUNT (0x13): Reset the people counter to 0
 
 - **Status Updates** (STM32 to LabVIEW):
-  - STATUS_UPDATE (0x20): Door state, light state, current mode, person count
-
-- **Control Frames**:
-  - ACK (0x30): Acknowledge receipt of a frame
-  - NACK (0x31): Indicate failure to process a frame
+  - DOOR_STATE (0x01)
+  - LIGHT_STATE (0x02)
+  - PERSON_ COUNT (0x03)
+  - SYSTEM_MODE (0x04)
+  - FUUL_SNAPSHOT (0x05)
 
 ### Reliability Features
 - Frame ID tracking
@@ -79,8 +88,9 @@ The system communicates with a LabVIEW application using a custom frame-based UA
 The system tracks and reports the following door states:
 - **OPEN**: Door is fully open
 - **OPENING**: Door is in the process of opening
-- **CLOSE**: Door is fully closed
+- **CLOSEED**: Door is fully closed
 - **CLOSING**: Door is in the process of closing
+- **ERROR**  
 
 ## People Counting Logic
 The system uses PIR sensors to detect motion and increment/decrement people count:
@@ -104,15 +114,17 @@ Core/
   │   │   ├── rcc_config.h      # Clock configuration
   │   │   ├── systick_driver.h  # System tick for timing
   │   │   └── uart_driver.h     # UART communication
-  │   └── Services/             # Service layer headers
-  │       ├── limit_switch_service.h  # Door position detection
-  │       ├── pir_sensor_service.h    # Motion detection
-  │       └── uart_protocol_service.h # UART protocol implementation
-  │
-  ├── Services/                 # Service implementations
-  │   ├── motor_control_service.c  # Motor control implementation
-  │   └── motor_control_service.h  # Motor control header
-  │
+  │   ├── Services/             # Service layer headers
+  │   |   ├── limit_switch_service.h  # Door position detection
+  │   |   ├── pir_sensor_service.h    # Motion detection
+  │   |   ├── uart_protocol_service.h # UART protocol implementation
+  |   |   ├── motor_control_service.h # Motor control header
+  |   |   └── light_control_service.h # Light control header
+  │   └── Applications/
+  |       ├── system_manager.h
+  |       ├── door_fsm.h
+  |       ├── lightting_logic.h
+  |       └── people_counter.h
   ├── Src/                      # Source files
   │   ├── main.c                # Main application
   │   ├── stm32f4xx_hal_msp.c   # HAL MSP initialization
@@ -127,11 +139,19 @@ Core/
   │   │   ├── rcc_config.c      # Clock configuration
   │   │   ├── systick_driver.c  # System tick for timing
   │   │   └── uart_driver.c     # UART communication
-  │   └── Services/             # Service implementations
-  │       ├── limit_switch_service.c  # Door position detection
-  │       ├── pir__sensor_service.c   # Motion detection
-  │       └── uart_protocol_service.c # UART protocol implementation
-  │
+  │   ├── Services/             # Service implementations
+  │   │   ├── limit_switch_service.c  # Door position detection
+  │   │   ├── pir__sensor_service.c   # Motion detection
+  │   │   ├── uart_protocol_service.c # UART protocol implementation
+  │   │   ├── uart_protocol_service.c # UART protocol implementation
+  │   │   ├── uart_protocol_service.c # UART protocol implementation
+  |   │   ├── motor_control_service.c # Motor control implementation
+  |   │   └── light_control_service.c # Light control implementation
+  │   └── Applications/
+  │       ├── system_manager.c
+  │       ├── door_fsm.c
+  │       ├── lighting_logic.c
+  │       └── people_counter.c
   └── Startup/                  # Startup code
       └── startup_stm32f401retx.s  # Assembly startup file
 ```

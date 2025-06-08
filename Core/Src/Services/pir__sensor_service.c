@@ -21,10 +21,6 @@ static PIR_GpioConfig_t g_pir_configs[PIR_SENSOR_COUNT];
 
 // Callback cho PIR 1
 static void pir1_exti_event_handler(uint8_t exti_line) {
-    // Giả định HC-SR501: Output HIGH khi phát hiện, LOW khi không.
-    // Cấu hình EXTI_TRIGGER_RISING để báo hiệu bắt đầu phát hiện.
-    // Và EXTI_TRIGGER_FALLING để báo hiệu kết thúc phát hiện.
-    // GPIO_ReadPin trả về 1 (GPIO_PIN_SET) nếu pin đang HIGH.
 
     if (GPIO_ReadPin(g_pir_configs[PIR_SENSOR_IN].port, (1U << g_pir_configs[PIR_SENSOR_IN].pin_number)) == GPIO_PIN_SET) {
         g_pir_motion_detected_state[PIR_SENSOR_IN] = true;

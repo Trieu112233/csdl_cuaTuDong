@@ -33,12 +33,11 @@ static void process_received_frame_logic(void);
 static bool actually_send_frame(FrameType_t type, uint8_t id, const uint8_t* payload, uint8_t length);
 
 void UARTProto_Init(uart_command_handler_callback_t command_callback) {
-    g_app_command_callback = command_callback;
+	g_app_command_callback = command_callback;
     reset_rx_parser();
 }
 
 static bool actually_send_frame(FrameType_t type, uint8_t id, const uint8_t* payload, uint8_t length) {
-    // This check is redundant if UARTProto_SendFrame also checks, but harmless.
     if (length > MAX_PAYLOAD_LENGTH) {
         return false;
     }
@@ -92,7 +91,6 @@ static void process_received_frame_logic(void) {
                     g_app_command_callback(&g_current_rx_frame);
                 }
             } else {
-                // Invalid payload length for SET_MODE. Silently ignore or log if needed.
             }
             break;
 
@@ -111,7 +109,6 @@ static void process_received_frame_logic(void) {
             // Unknown command ID received from LabVIEW. Silently ignore or log.
             break;
     }
-    // No ACK or NACK is sent.
 }
 
 void UARTProto_Process(void) {
@@ -170,7 +167,6 @@ void UARTProto_Process(void) {
                 // g_rx_buffer_idx is count of bytes in g_rx_buffer *before* adding current 'byte'.
                 uint8_t payload_byte_index = g_rx_buffer_idx - 4;
 
-                // Ensure we don't write past allocated payload buffer, though g_expected_payload_len should protect this.
                 if (payload_byte_index < MAX_PAYLOAD_LENGTH) {
                      g_current_rx_frame.payload[payload_byte_index] = byte;
                 }

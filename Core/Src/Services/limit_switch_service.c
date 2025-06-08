@@ -91,6 +91,14 @@ void LimitSwitchService_Init(GPIO_TypeDef* open_ls_port, uint8_t open_ls_pin_num
 }
 
 void LimitSwitchService_ProcessDebounce(void) {
+	neu ngat sw -> switchPressCnt=1
+	getPin == 0, state = 1
+	getPin == 1 && state = 1
+	 cnt+1
+	if(switchPress==1)
+	{
+
+	}
     for (int i = 0; i < LIMIT_SWITCH_COUNT; ++i) {
         LimitSwitch_Internal_t* ls = &g_limit_switches[i];
 
