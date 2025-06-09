@@ -1,4 +1,4 @@
 ../Core/Src/Applications/people_counter.c:31:6:PeopleCounter_Init	16	static
 ../Core/Src/Applications/people_counter.c:43:6:PeopleCounter_Process	24	static
-../Core/Src/Applications/people_counter.c:113:9:PeopleCounter_GetCount	4	static
-../Core/Src/Applications/people_counter.c:117:6:PeopleCounter_Reset	8	static,ignoring_inline_asm
+../Core/Src/Applications/people_counter.c:111:9:PeopleCounter_GetCount	4	static
+../Core/Src/Applications/people_counter.c:115:6:PeopleCounter_Reset	8	static,ignoring_inline_asm

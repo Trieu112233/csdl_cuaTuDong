@@ -46,7 +46,7 @@ void PeopleCounter_Process(void);
  * @brief Gets the current estimated number of people in the room.
  * @return The number of people.
  */
-int16_t PeopleCounter_GetCount(void);
+uint8_t PeopleCounter_GetCount(void);
 
 /**
  * @brief Resets the people counter to zero.

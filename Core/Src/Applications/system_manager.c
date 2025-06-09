@@ -55,7 +55,7 @@ static DoorState_t g_current_door_state = DOOR_STATE_INIT;
 
 // Callback được people_counter gọi khi có người đi qua
 void app_person_passed_handler(PersonPassedDirection_t direction) {
-    if (g_system_op_mode == SYSTEM_MODE_NORMAL) {
+    if (g_cur_system_op_mode == SYSTEM_MODE_NORMAL) {
         // Chỉ thông báo cho FSM nếu đang ở chế độ NORMAL
         DoorFSM_NotifyPersonDetectedPassing();
     }
@@ -90,7 +90,7 @@ void SystemManager_Init(void) {
 
     // Gửi trạng thái ban đầu của hệ thống
     uint8_t initial_status_payload[4];
-    initial_status_payload[0] = g_system_op_mode; // Chế độ hệ thống
+    initial_status_payload[0] = g_cur_system_op_mode; // Chế độ hệ thống
     initial_status_payload[1] = g_current_door_state; // Trạng thái cửa
     initial_status_payload[2] = g_cur_perCnt; // Số người hiện tại
     initial_status_payload[3] = g_cur_light_state; // Trạng thái đèn
@@ -121,7 +121,7 @@ void SendFrameToLabVIEWProcess(void) {
     }
 
     if (g_cur_perCnt != g_prev_perCnt) {
-        UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PEOPLE_COUNT, 
+        UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PERSON_COUNT,
                             (uint8_t*)&g_cur_perCnt, 1);
         // Cập nhật số người cũ
         g_prev_perCnt = g_cur_perCnt;

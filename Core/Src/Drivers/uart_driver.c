@@ -65,8 +65,6 @@ void UART2_Init(uint32_t baudrate, uint32_t word_length, uint32_t parity, uint32
 
     // 7. Cấu hình Control Register: Bật TX, RX và RXNE Interrupt
     USART2->CR1 |= USART_CR1_TE | USART_CR1_RE | USART_CR1_RXNEIE;
-    // USART2->CR3 &= ~USART_CR3_CTSE; // Tắt CTS flow control
-    // USART2->CR3 &= ~USART_CR3_RTSE; // Tắt RTS flow control
 
     // 8. Reset trạng thái buffer
     g_uart2_rx_buffer_head = 0;

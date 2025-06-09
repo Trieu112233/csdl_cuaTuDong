@@ -1,5 +1,6 @@
-../Core/Src/Applications/system_manager.c:49:6:app_person_passed_handler	2
-../Core/Src/Applications/system_manager.c:57:6:SystemManager_Init	1
-../Core/Src/Applications/system_manager.c:83:6:SystemManager_Process	1
-../Core/Src/Applications/system_manager.c:91:6:SystemManager_HandleLabVIEWCommand	9
-../Core/Src/Applications/system_manager.c:139:16:SystemManager_GetCurrentMode	1
+../Core/Src/Applications/system_manager.c:57:6:app_person_passed_handler	2
+../Core/Src/Applications/system_manager.c:66:6:SystemManager_Init	1
+../Core/Src/Applications/system_manager.c:101:6:SystemManager_Process	1
+../Core/Src/Applications/system_manager.c:110:6:SendFrameToLabVIEWProcess	5
+../Core/Src/Applications/system_manager.c:146:6:SystemManager_HandleLabVIEWCommand	9
+../Core/Src/Applications/system_manager.c:194:16:SystemManager_GetCurrentMode	1

@@ -61,7 +61,6 @@ int8_t PWM_InitChannel(PWM_TimerInstance_e timer_instance, PWM_TimerChannel_e ch
     // 3. Tính toán Prescaler (PSC) và Auto-Reload Register (ARR)
     // Tần số clock của Timer (ví dụ PCLK1 cho TIM2/3/4/5)
     // Nếu Prescaler của APB1 khác 1, PCLK1_TIMER_CLOCK = PCLK1_FREQUENCY_HZ * 2
-    // (Tham khảo mục "Timer clock" trong Reference Manual)
     uint32_t timer_clock_hz;
     if (TIMx == TIM2 || TIMx == TIM3 || TIMx == TIM4 || TIMx == TIM5) { // Thuộc APB1
         if ((RCC->CFGR & RCC_CFGR_PPRE1) == RCC_CFGR_PPRE1_DIV1) { // APB1 Prescaler = 1
@@ -136,10 +135,8 @@ int8_t PWM_InitChannel(PWM_TimerInstance_e timer_instance, PWM_TimerChannel_e ch
     // Bật bit ARPE (Auto-Reload Preload Enable) trong CR1 để ARR được buffer
     TIMx->CR1 |= TIM_CR1_ARPE;
 
-    // (Tùy chọn) Tạo một update event để nạp các giá trị preload vào shadow registers
+    // Tạo một update event để nạp các giá trị preload vào shadow registers
     TIMx->EGR |= TIM_EGR_UG;
-
-    // Timer chưa được start ở đây, sẽ start bằng PWM_Start()
 
     return 0;
 }
@@ -159,7 +156,7 @@ int8_t PWM_SetDutyCycle(PWM_TimerInstance_e timer_instance, PWM_TimerChannel_e c
     uint32_t ccr_val = (uint32_t)((duty_cycle_percent / 100.0f) * (float)(arr_val +1));
     // arr_val+1 vì duty cycle 100% ứng với CCR = ARR+1 (hoặc ARR nếu dùng PWM mode khác)
     // Với PWM Mode 1 (đếm lên): 0% -> CCR=0; 100% -> CCR = ARR+1 (hoặc lớn hơn ARR)
-    // Để đơn giản, nếu CCR > ARR, thì nó sẽ là 100% duty.
+    // nếu CCR > ARR, thì nó sẽ là 100% duty.
 
     if (ccr_val > arr_val) ccr_val = arr_val +1; // Đảm bảo 100% là CCR > ARR
 
