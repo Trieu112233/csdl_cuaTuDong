@@ -28,7 +28,6 @@ typedef struct {
 static LimitSwitch_Internal_t g_limit_switches[LIMIT_SWITCH_COUNT];
 
 // Giả định: Công tắc là ACTIVE LOW (khi nhấn thì nối với GND, dùng PULL_UP nội)
-// Do đó, khi đọc pin, LOW (0) nghĩa là công tắc được nhấn (active).
 #define LIMIT_SWITCH_ACTIVE_LEVEL GPIO_PIN_RESET // 0
 
 // Callback cho công tắc "Cửa Mở Hoàn Toàn"
@@ -70,7 +69,7 @@ void LimitSwitchService_Init(GPIO_TypeDef* open_ls_port, uint8_t open_ls_pin_num
     ls_open->debounce_start_tick = 0;
     ls_open->last_raw_pin_state = (ls_open->current_stable_state ? LIMIT_SWITCH_ACTIVE_LEVEL : !LIMIT_SWITCH_ACTIVE_LEVEL);
 
-    // EXTI_InitPin sẽ cấu hình GPIO là input. Chúng ta muốn PULL_UP vì công tắc active LOW.
+    // EXTI_InitPin sẽ cấu hình GPIO là input, PULL_UP vì công tắc active LOW.
     // Trigger trên cả hai sườn để bắt đầu debounce khi có bất kỳ thay đổi nào.
     EXTI_InitPin(ls_open->port, ls_open->pin_number, EXTI_TRIGGER_BOTH,
                  nvic_priority, ls_open_exti_handler);
@@ -91,29 +90,17 @@ void LimitSwitchService_Init(GPIO_TypeDef* open_ls_port, uint8_t open_ls_pin_num
 }
 
 void LimitSwitchService_ProcessDebounce(void) {
-	neu ngat sw -> switchPressCnt=1
-	getPin == 0, state = 1
-	getPin == 1 && state = 1
-	 cnt+1
-	if(switchPress==1)
-	{
-
-	}
     for (int i = 0; i < LIMIT_SWITCH_COUNT; ++i) {
         LimitSwitch_Internal_t* ls = &g_limit_switches[i];
 
         if (ls->debounce_state == DEBOUNCE_STATE_WAITING) {
             if ((GetTick() - ls->debounce_start_tick) >= DEBOUNCE_TIME_MS) {
-                // Thời gian debounce đã hết, đọc lại trạng thái pin
-                uint8_t current_pin_state = GPIO_ReadPin(ls->port, (1U << ls->pin_number));
-
-                // Chỉ cập nhật trạng thái ổn định nếu trạng thái đọc được VẪN GIỐNG
-                // với trạng thái thô cuối cùng được ghi nhận bởi ISR.
-                // Điều này giúp xử lý trường hợp pin thay đổi nhiều lần trong thời gian debounce.
-                // Chúng ta quan tâm đến trạng thái cuối cùng sau khi hết debounce.
-                // Hoặc đơn giản hơn, chỉ cần lấy trạng thái hiện tại sau khi debounce.
-                // Cách đơn giản:
-                bool new_stable_state = (current_pin_state == LIMIT_SWITCH_ACTIVE_LEVEL);
+                // Thời gian debounce đã hết.
+                // Sử dụng trạng thái pin cuối cùng được ghi nhận bởi ISR.
+                // ISR đã cập nhật ls->last_raw_pin_state với mỗi lần trigger ngắt.
+                // Vì vậy, sau DEBOUNCE_TIME_MS, ls->last_raw_pin_state
+                // sẽ giữ trạng thái của lần trigger cuối cùng trong khoảng thời gian đó.
+                bool new_stable_state = (ls->last_raw_pin_state == LIMIT_SWITCH_ACTIVE_LEVEL);
 
                 if (ls->current_stable_state != new_stable_state) {
                     ls->current_stable_state = new_stable_state;
@@ -128,10 +115,6 @@ void LimitSwitchService_ProcessDebounce(void) {
 }
 
 bool LimitSwitchService_IsDoorFullyOpen(void) {
-    // Quan trọng: Cần bảo vệ việc đọc biến này nếu ProcessDebounce có thể chạy từ ngắt khác
-    // hoặc nếu có đa luồng. Trong trường hợp ProcessDebounce chạy ở main loop,
-    // và ISR chỉ set cờ, thì việc đọc trực tiếp có thể ổn.
-    // Để an toàn, có thể dùng critical section ngắn.
     bool state;
     __disable_irq(); // critical section
     state = g_limit_switches[LIMIT_SWITCH_ID_DOOR_OPEN].current_stable_state;

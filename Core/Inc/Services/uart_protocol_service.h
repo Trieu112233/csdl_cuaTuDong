@@ -23,15 +23,13 @@ typedef enum {
     FRAME_TYPE_LABVIEW_TO_STM = 0x02  // Messages sent from LabVIEW to STM32
 } FrameType_t;
 
-// IDs for messages (used in the 'id' field of the frame)
-
 // IDs for Type: FRAME_TYPE_STM_TO_LABVIEW (STM32 -> LabVIEW)
 #define FRAME_ID_STM_DOOR_STATE       0x01
 #define FRAME_ID_STM_LIGHT_STATE      0x02
 #define FRAME_ID_STM_PERSON_COUNT     0x03
 #define FRAME_ID_STM_SYSTEM_MODE      0x04
 #define FRAME_ID_STM_FULL_SNAPSHOT    0x05
-#define FRAME_ID_STM_LOG_DEBUG        0x00 // Payload: ASCII string
+#define FRAME_ID_STM_COMMAND_ACK      0x00 // Payload: ID of the command that was acknowledged
 
 // Common Payload Values for Door State (for FRAME_ID_STM_DOOR_STATE)
 #define PAYLOAD_DOOR_CLOSED         0x00

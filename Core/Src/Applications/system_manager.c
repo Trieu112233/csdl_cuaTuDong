@@ -51,7 +51,6 @@ void app_person_passed_handler(PersonPassedDirection_t direction) {
         // Chỉ thông báo cho FSM nếu đang ở chế độ NORMAL
         DoorFSM_NotifyPersonDetectedPassing();
     }
-    // Có thể gửi ngay một status update nếu cần
 }
 
 
@@ -70,31 +69,28 @@ void SystemManager_Init(void) {
     g_system_op_mode = SYSTEM_MODE_NORMAL; // Đặt chế độ mặc định
     DoorFSM_NotifySystemModeChange(g_system_op_mode); // Thông báo cho FSM
     g_last_status_update_tick = GetTick();
+
+    // Gửi trạng thái ban đầu của hệ thống
+    uint8_t initial_status_payload[4];
+    initial_status_payload[0] = g_system_op_mode; // Chế độ hệ thống
+    initial_status_payload[1] = g_current_door_state; // Trạng thái cửa
+    initial_status_payload[2] = PeopleCounter_GetCount(); // Số người hiện tại
+    initial_status_payload[3] = LightingLogic_IsLightIntendedToBeOn() ? PAYLOAD_LIGHT_ON : PAYLOAD_LIGHT_OFF; // Trạng thái đèn
+
+    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_FULL_SNAPSHOT, initial_status_payload, 4);
 }
 
 void SystemManager_Process(void) {
     UARTProto_Process();
     LimitSwitchService_ProcessDebounce();
-    PeopleCounter_Process();
+    
+    if(PeopleCounter_Process(perCnt)!=0)
+    {
+        UARTProto_SendFrameNtf(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PERSON_COUNT, (uint8_t*)&perCnt, 1);
+    }
     DoorFSM_Process();
     LightingLogic_Process();
 
-    // Gửi status update định kỳ
-    if ((GetTick() - g_last_status_update_tick) >= STATUS_UPDATE_INTERVAL_MS) {
-        g_last_status_update_tick = GetTick();
-
-        // --- Gửi FRAME_ID_STM_FULL_SNAPSHOT ---
-        uint8_t snapshot_payload[4];
-        snapshot_payload[0] = (uint8_t)g_system_op_mode;
-        snapshot_payload[1] = (uint8_t)DoorFSM_GetState();
-        snapshot_payload[2] = (uint8_t)PeopleCounter_GetCount();
-        snapshot_payload[3] = LightService_GetState() ? PAYLOAD_LIGHT_ON : PAYLOAD_LIGHT_OFF;
-
-        UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW,
-                              FRAME_ID_STM_FULL_SNAPSHOT,
-                              snapshot_payload,
-                              4);
-    }
 }
 
 bool SystemManager_HandleLabVIEWCommand(const ParsedFrame_t* frame) {
@@ -112,7 +108,9 @@ bool SystemManager_HandleLabVIEWCommand(const ParsedFrame_t* frame) {
                 if (requested_mode == SYSTEM_MODE_NORMAL ||
                     requested_mode == SYSTEM_MODE_FORCE_OPEN ||
                     requested_mode == SYSTEM_MODE_FORCE_CLOSE) {
-
+                    // Gửi ACK về LabVIEW
+                    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_COMMAND_ACK, &ack_payload_id, 1);
+                    // Cập nhật chế độ hệ thống
                     g_system_op_mode = requested_mode;
                     DoorFSM_NotifySystemModeChange(g_system_op_mode);
                     cmd_processed_ok = true;
@@ -126,6 +124,9 @@ bool SystemManager_HandleLabVIEWCommand(const ParsedFrame_t* frame) {
 
         case FRAME_ID_LABVIEW_RESET_COUNT:
             if (frame->length == 0) { // Lệnh này không cần payload
+                // Gửi ACK về LabVIEW
+                UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_COMMAND_ACK, &ack_payload_id, 1);
+                // Reset bộ đếm người
                 PeopleCounter_Reset();
                 cmd_processed_ok = true;
             } else {

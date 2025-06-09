@@ -14,7 +14,7 @@
 #include "systick_driver.h"
 
 static DoorState_t    g_current_door_state = DOOR_STATE_INIT;
-static DoorState_t    g_previous_door_state = DOOR_STATE_INIT;
+static DoorState_t    g_previous_door_state = DOOR_STATE_INIT; 
 static SystemOpMode_t g_current_system_mode = SYSTEM_MODE_NORMAL;
 static uint32_t g_state_timer_start_tick = 0;
 
@@ -30,27 +30,30 @@ static void change_door_state(DoorState_t new_state) {
         g_previous_door_state = g_current_door_state; // Lưu trạng thái cũ
         g_current_door_state = new_state; // Cập nhật trạng thái mới
         g_state_timer_start_tick = GetTick(); // Reset timer khi chuyển trạng thái
-    }
 
+        // Gửi trạng thái cửa mới qua UART khi có thay đổi
+        UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_DOOR_STATE, (uint8_t*)&g_current_door_state, 1);
+    }
 }
 
 void DoorFSM_Init(void) {
+    // Xác định trạng thái ban đầu dựa trên công tắc hành trình
     if (LimitSwitchService_IsDoorFullyClosed()) {
         g_current_door_state = DOOR_STATE_CLOSED;
     } else if (LimitSwitchService_IsDoorFullyOpen()) {
         g_current_door_state = DOOR_STATE_OPEN;
     } else {
-        g_current_door_state = DOOR_STATE_ERROR; // Nếu không rõ trạng thái, chuyển sang ERROR
+        g_current_door_state = DOOR_STATE_ERROR;
     }
+    g_previous_door_state = g_current_door_state; 
+
     UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_DOOR_STATE, (uint8_t*)&g_current_door_state, 1);
-    g_previous_door_state = DOOR_STATE_INIT; // Khởi tạo trạng thái trước 
     g_state_timer_start_tick = GetTick(); // Bắt đầu timer
 }
 
 void DoorFSM_Process(void) {
     bool just_enter_state = (g_current_door_state != g_previous_door_state);
     if(just_enter_state){
-        g_previous_door_state = g_current_door_state; 
     }
 
     // Xử lý ưu tiên: nếu đang ở chế độ FORCE_OPEN hoặc FORCE_CLOSE, cần xử lý trước
@@ -71,36 +74,36 @@ void DoorFSM_Process(void) {
     // Logic xử lý trạng thái hiện tại
     switch (g_current_door_state) {
         case DOOR_STATE_INIT:
-            DoorFSM_Init();
+            // Trạng thái INIT chỉ để khởi tạo, không xử lý gì thêm
+            if (LimitSwitchService_IsDoorFullyClosed()) {
+                 change_door_state(DOOR_STATE_CLOSED);
+            } else {
+                 change_door_state(DOOR_STATE_CLOSING); // Thử đóng lại
+            }
             break;
 
         case DOOR_STATE_CLOSED:
             process_state_closed(just_enter_state);
-            UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_DOOR_STATE, (uint8_t*)&g_current_door_state, 1);
             break;
 
         case DOOR_STATE_OPENING:
             process_state_opening(just_enter_state);
-            UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_DOOR_STATE, (uint8_t*)&g_current_door_state, 1);
             break;
 
-        case DOOR_STATE_OPEN:           
+        case DOOR_STATE_OPEN:
             process_state_open(just_enter_state);
-            UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_DOOR_STATE, (uint8_t*)&g_current_door_state, 1);
             break;
 
         case DOOR_STATE_CLOSING:
             process_state_closing(just_enter_state);
-            UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_DOOR_STATE, (uint8_t*)&g_current_door_state, 1);    
             break;
 
         case DOOR_STATE_ERROR:
             process_state_error(just_enter_state);
-            UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_DOOR_STATE, (uint8_t*)&g_current_door_state, 1);
             break;
-
-        default:
-            break;
+    }
+    if (just_enter_state) { // Nếu vừa vào trạng thái mới (được set bởi change_door_state)
+        g_previous_door_state = g_current_door_state; // Đảm bảo previous được cập nhật cho lần Process tiếp theo
     }
 }
 
@@ -108,17 +111,10 @@ DoorState_t DoorFSM_GetState(void) {
     return g_current_door_state; 
 }
 
-void DoorFSM_NotifySystemModeChange(SystemOpMode_t new_mode) { 
-    SystemOpMode_t old_mode = g_current_system_mode;
-    g_current_system_mode = new_mode;
-
-    if ((old_mode == SYSTEM_MODE_FORCE_OPEN || old_mode == SYSTEM_MODE_FORCE_CLOSE) && new_mode == SYSTEM_MODE_NORMAL) {
-        if (g_current_door_state == DOOR_STATE_OPEN) {
-            g_state_timer_start_tick = GetTick(); // Reset auto-close timer
-        }
+void DoorFSM_NotifySystemModeChange(SystemOpMode_t new_mode) {
+    if (g_current_system_mode != new_mode) {
+        g_current_system_mode = new_mode;
     }
-
-    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_SYSTEM_MODE, (uint8_t*)&g_current_system_mode, 1);
 }
 
 void DoorFSM_NotifyPersonDetectedPassing(void) { 
@@ -207,6 +203,4 @@ static void process_state_error(bool just_enter_state) {
     } else if (g_current_system_mode == SYSTEM_MODE_FORCE_CLOSE) {
         change_door_state(DOOR_STATE_CLOSING); // Chuyển sang đóng cửa nếu ở chế độ FORCE_CLOSE
     }
-    // Ở trạng thái lỗi, không làm gì cả, chờ người dùng can thiệp
-    // Có thể thêm logic reset nếu cần
 }

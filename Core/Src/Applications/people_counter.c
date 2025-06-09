@@ -38,11 +38,9 @@ void PeopleCounter_Init(person_passed_callback_t callback) {
     // Khởi tạo trạng thái PIR ban đầu
     g_pir_outside_last_state = PIRService_IsMotionDetected(PIR_SENSOR_OUT);
     g_pir_inside_last_state = PIRService_IsMotionDetected(PIR_SENSOR_IN);
-
-    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PERSON_COUNT, (uint8_t*)&g_person_count, 1);
 }
 
-void PeopleCounter_Process(void) {
+void PeopleCounter_Process(uint8_t *perCnt) {
     bool pir_outside_current_state = PIRService_IsMotionDetected(PIR_SENSOR_OUT);
     bool pir_inside_current_state = PIRService_IsMotionDetected(PIR_SENSOR_IN);
     uint32_t current_tick = GetTick();
