@@ -41,9 +41,17 @@
 #define LIGHT_RELAY_PIN         9 // Ví dụ
 
 
-static SystemOpMode_t g_system_op_mode = SYSTEM_MODE_NORMAL;
-static uint32_t g_last_status_update_tick = 0;
+static SystemOpMode_t g_prev_system_op_mode = SYSTEM_MODE_NORMAL;
+static SystemOpMode_t g_cur_system_op_mode = SYSTEM_MODE_NORMAL; // Chế độ hệ thống hiện tại
 
+static uint8_t g_prev_perCnt = 0;
+static uint8_t g_cur_perCnt = 0;
+
+static bool g_prev_light_state = false;
+static bool g_cur_light_state = false;
+
+static DoorState_t g_prev_door_state = DOOR_STATE_INIT;
+static DoorState_t g_current_door_state = DOOR_STATE_INIT;
 
 // Callback được people_counter gọi khi có người đi qua
 void app_person_passed_handler(PersonPassedDirection_t direction) {
@@ -53,6 +61,7 @@ void app_person_passed_handler(PersonPassedDirection_t direction) {
     }
 }
 
+void SendFrameToLabVIEWProcess(void);
 
 void SystemManager_Init(void) {
     UARTProto_Init(SystemManager_HandleLabVIEWCommand);
@@ -66,16 +75,25 @@ void SystemManager_Init(void) {
     DoorFSM_Init();
     LightingLogic_Init();
 
-    g_system_op_mode = SYSTEM_MODE_NORMAL; // Đặt chế độ mặc định
-    DoorFSM_NotifySystemModeChange(g_system_op_mode); // Thông báo cho FSM
-    g_last_status_update_tick = GetTick();
+    g_prev_system_op_mode = SYSTEM_MODE_NORMAL; // Chế độ hệ thống ban đầu
+    g_cur_system_op_mode = g_prev_system_op_mode; // Chế độ hệ thống hiện tại
+    DoorFSM_NotifySystemModeChange(g_cur_system_op_mode); // Thông báo cho FSM
+
+    g_prev_perCnt = PeopleCounter_GetCount();
+    g_cur_perCnt = g_prev_perCnt;
+
+    g_prev_light_state = LightingLogic_IsLightIntendedToBeOn() ? PAYLOAD_LIGHT_ON : PAYLOAD_LIGHT_OFF;
+    g_cur_light_state = g_prev_light_state;
+
+    g_prev_door_state = DoorFSM_GetState();
+    g_current_door_state = g_prev_door_state;
 
     // Gửi trạng thái ban đầu của hệ thống
     uint8_t initial_status_payload[4];
     initial_status_payload[0] = g_system_op_mode; // Chế độ hệ thống
-    initial_status_payload[1] = DoorFSM_GetState(); // Trạng thái cửa
-    initial_status_payload[2] = PeopleCounter_GetCount(); // Số người hiện tại
-    initial_status_payload[3] = LightingLogic_IsLightIntendedToBeOn() ? PAYLOAD_LIGHT_ON : PAYLOAD_LIGHT_OFF; // Trạng thái đèn
+    initial_status_payload[1] = g_current_door_state; // Trạng thái cửa
+    initial_status_payload[2] = g_cur_perCnt; // Số người hiện tại
+    initial_status_payload[3] = g_cur_light_state; // Trạng thái đèn
 
     UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_FULL_SNAPSHOT, initial_status_payload, 4);
 }
@@ -86,6 +104,43 @@ void SystemManager_Process(void) {
     PeopleCounter_Process();
     DoorFSM_Process();
     LightingLogic_Process();
+    SendFrameToLabVIEWProcess();
+}
+
+void SendFrameToLabVIEWProcess(void) {
+    g_cur_perCnt = PeopleCounter_GetCount();
+    g_cur_light_state = LightingLogic_IsLightIntendedToBeOn() ? PAYLOAD_LIGHT_ON : PAYLOAD_LIGHT_OFF;
+    g_current_door_state = DoorFSM_GetState();
+
+    // Chỉ gửi frame nếu có thay đổi
+    if (g_current_door_state != g_prev_door_state)  {
+        UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_DOOR_STATE, 
+                            (uint8_t*)&g_current_door_state, 1);
+        // Cập nhật trạng thái cũ
+        g_prev_door_state = g_current_door_state;
+    }
+
+    if (g_cur_perCnt != g_prev_perCnt) {
+        UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PEOPLE_COUNT, 
+                            (uint8_t*)&g_cur_perCnt, 1);
+        // Cập nhật số người cũ
+        g_prev_perCnt = g_cur_perCnt;
+    }
+
+    if (g_cur_light_state != g_prev_light_state) {
+        UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_LIGHT_STATE, 
+                            (uint8_t*)&g_cur_light_state, 1);
+        // Cập nhật trạng thái đèn cũ
+        g_prev_light_state = g_cur_light_state;
+    }
+
+    if (g_cur_system_op_mode != g_prev_system_op_mode) {
+        // Gửi frame thông báo chế độ hệ thống
+        UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_SYSTEM_MODE, 
+                            (uint8_t*)&g_cur_system_op_mode, 1);
+        // Cập nhật chế độ cũ
+        g_prev_system_op_mode = g_cur_system_op_mode;
+    }
 }
 
 bool SystemManager_HandleLabVIEWCommand(const ParsedFrame_t* frame) {
@@ -106,8 +161,8 @@ bool SystemManager_HandleLabVIEWCommand(const ParsedFrame_t* frame) {
                     // Gửi ACK về LabVIEW
                     UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_COMMAND_ACK, &frame->id, 1);
                     // Cập nhật chế độ hệ thống
-                    g_system_op_mode = requested_mode;
-                    DoorFSM_NotifySystemModeChange(g_system_op_mode);
+                    g_cur_system_op_mode = requested_mode;
+                    DoorFSM_NotifySystemModeChange(g_cur_system_op_mode);
                     cmd_processed_ok = true;
                 } else {
                     cmd_processed_ok = false; // Mode không hợp lệ
@@ -137,6 +192,6 @@ bool SystemManager_HandleLabVIEWCommand(const ParsedFrame_t* frame) {
 }
 
 SystemOpMode_t SystemManager_GetCurrentMode(void) {
-    return g_system_op_mode;
+    return g_cur_system_op_mode;
 }
 

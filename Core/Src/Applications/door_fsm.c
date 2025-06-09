@@ -30,9 +30,6 @@ static void change_door_state(DoorState_t new_state) {
         g_previous_door_state = g_current_door_state; // Lưu trạng thái cũ
         g_current_door_state = new_state; // Cập nhật trạng thái mới
         g_state_timer_start_tick = GetTick(); // Reset timer khi chuyển trạng thái
-
-        // Gửi trạng thái cửa mới qua UART khi có thay đổi
-        UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_DOOR_STATE, (uint8_t*)&g_current_door_state, 1);
     }
 }
 
@@ -47,7 +44,6 @@ void DoorFSM_Init(void) {
     }
     g_previous_door_state = g_current_door_state; 
 
-    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_DOOR_STATE, (uint8_t*)&g_current_door_state, 1);
     g_state_timer_start_tick = GetTick(); // Bắt đầu timer
 }
 

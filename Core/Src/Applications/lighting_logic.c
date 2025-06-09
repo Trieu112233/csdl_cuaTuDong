@@ -27,12 +27,10 @@ void LightingLogic_Process(void) {
     if (current_person_count > 0) {
         if (!current_light_hw_state) {
             LightService_TurnOn();
-            UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_LIGHT_STATE, PAYLOAD_LIGHT_ON, 0);
         }
     } else {
         if (current_light_hw_state) {
             LightService_TurnOff();
-            UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_LIGHT_STATE, PAYLOAD_LIGHT_OFF, 0);
         }
     }
 }

@@ -10,7 +10,7 @@
 #include "systick_driver.h"
 #include "uart_protocol_service.h"
 
-static volatile int16_t g_person_count = 0;
+static volatile uint8_t g_person_count = 0;
 
 // Máy trạng thái cho việc phát hiện hướng
 typedef enum {
@@ -72,7 +72,6 @@ void PeopleCounter_Process() {
         case DETECTION_STATE_EXPECTING_PIR_INSIDE: // PIR_OUTSIDE đã active, chờ PIR_INSIDE
             if (pir_inside_triggered) { // PIR_INSIDE cũng active -> Người vào
                 g_person_count++;
-                UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PERSON_COUNT, (uint8_t*)&g_person_count, 1);
                 g_detection_state = DETECTION_STATE_IDLE;
                 g_last_detection_time = current_tick;
                 if (g_person_passed_cb) g_person_passed_cb(PERSON_PASSED_ENTERED);
@@ -90,7 +89,6 @@ void PeopleCounter_Process() {
             if (pir_outside_triggered) { // PIR_OUTSIDE cũng active -> Người ra
                 if (g_person_count > 0) {
                     g_person_count--;
-                    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PERSON_COUNT, (uint8_t*)&g_person_count, 1);
                 }
                 g_detection_state = DETECTION_STATE_IDLE;
                 g_last_detection_time = current_tick;
@@ -110,7 +108,7 @@ void PeopleCounter_Process() {
     g_pir_inside_last_state = pir_inside_current_state;
 }
 
-int16_t PeopleCounter_GetCount(void) {
+uint8_t PeopleCounter_GetCount(void) {
     return g_person_count;
 }
 
