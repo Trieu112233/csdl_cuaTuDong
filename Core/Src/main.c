@@ -11,7 +11,7 @@
 
 int main(void) {
    // Khởi tạo hệ thống
-   SystemClock_Config(); /
+   SystemClock_Config();
    SysTick_Init();       
    SystemManager_Init();
 
@@ -22,3 +22,4 @@ int main(void) {
 
    return 0;
 }
+

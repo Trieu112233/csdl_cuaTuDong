@@ -13,12 +13,12 @@
 
 // Định nghĩa các trạng thái của cửa
 typedef enum {
-    DOOR_STATE_INIT,
     DOOR_STATE_CLOSED,
     DOOR_STATE_OPENING,
     DOOR_STATE_OPEN,
     DOOR_STATE_CLOSING,
-    DOOR_STATE_ERROR
+    DOOR_STATE_ERROR,
+	DOOR_STATE_INIT
 } DoorState_t;
 
 typedef enum {

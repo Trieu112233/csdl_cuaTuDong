@@ -40,7 +40,7 @@ void PeopleCounter_Init(person_passed_callback_t callback) {
     g_pir_inside_last_state = PIRService_IsMotionDetected(PIR_SENSOR_IN);
 }
 
-void PeopleCounter_Process(uint8_t *perCnt) {
+void PeopleCounter_Process() {
     bool pir_outside_current_state = PIRService_IsMotionDetected(PIR_SENSOR_OUT);
     bool pir_inside_current_state = PIRService_IsMotionDetected(PIR_SENSOR_IN);
     uint32_t current_tick = GetTick();

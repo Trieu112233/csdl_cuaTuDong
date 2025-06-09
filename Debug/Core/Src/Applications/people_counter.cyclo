@@ -1,4 +1,4 @@
 ../Core/Src/Applications/people_counter.c:31:6:PeopleCounter_Init	1
-../Core/Src/Applications/people_counter.c:45:6:PeopleCounter_Process	23
-../Core/Src/Applications/people_counter.c:115:9:PeopleCounter_GetCount	1
-../Core/Src/Applications/people_counter.c:119:6:PeopleCounter_Reset	1
+../Core/Src/Applications/people_counter.c:43:6:PeopleCounter_Process	23
+../Core/Src/Applications/people_counter.c:113:9:PeopleCounter_GetCount	1
+../Core/Src/Applications/people_counter.c:117:6:PeopleCounter_Reset	1

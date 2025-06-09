@@ -35,6 +35,7 @@ static bool actually_send_frame(FrameType_t type, uint8_t id, const uint8_t* pay
 void UARTProto_Init(uart_command_handler_callback_t command_callback) {
 	g_app_command_callback = command_callback;
     reset_rx_parser();
+    UART2_Init(115200, UART_WORDLENGTH_8B, UART_PARITY_NONE, UART_STOPBITS_1);
 }
 
 static bool actually_send_frame(FrameType_t type, uint8_t id, const uint8_t* payload, uint8_t length) {

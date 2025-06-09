@@ -1,7 +1,7 @@
 ../Core/Src/Services/uart_protocol_service.c:35:6:UARTProto_Init	1
-../Core/Src/Services/uart_protocol_service.c:40:13:actually_send_frame	4
+../Core/Src/Services/uart_protocol_service.c:41:13:actually_send_frame	4
 ../Core/Src/Services/uart_protocol_service.c:63:6:UARTProto_SendFrame	2
 ../Core/Src/Services/uart_protocol_service.c:70:13:reset_rx_parser	1
 ../Core/Src/Services/uart_protocol_service.c:76:13:process_received_frame_logic	8
-../Core/Src/Services/uart_protocol_service.c:117:6:UARTProto_Process	19
-../Core/Src/Services/uart_protocol_service.c:211:6:UARTProto_CheckErrors	3
+../Core/Src/Services/uart_protocol_service.c:115:6:UARTProto_Process	19
+../Core/Src/Services/uart_protocol_service.c:208:6:UARTProto_CheckErrors	3

@@ -1,2 +1,2 @@
-../Core/Src/main.c:50:6:main_handle_labview_command	9
-../Core/Src/main.c:98:5:main	8
+../Core/Src/main.c:55:6:main_labview_command_handler	14
+../Core/Src/main.c:122:5:main	4

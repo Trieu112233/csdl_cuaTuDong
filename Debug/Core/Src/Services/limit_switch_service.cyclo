@@ -1,6 +1,6 @@
-../Core/Src/Services/limit_switch_service.c:35:13:ls_open_exti_handler	2
-../Core/Src/Services/limit_switch_service.c:50:13:ls_closed_exti_handler	2
-../Core/Src/Services/limit_switch_service.c:60:6:LimitSwitchService_Init	1
-../Core/Src/Services/limit_switch_service.c:93:6:LimitSwitchService_ProcessDebounce	5
-../Core/Src/Services/limit_switch_service.c:122:6:LimitSwitchService_IsDoorFullyOpen	1
-../Core/Src/Services/limit_switch_service.c:134:6:LimitSwitchService_IsDoorFullyClosed	1
+../Core/Src/Services/limit_switch_service.c:34:13:ls_open_exti_handler	2
+../Core/Src/Services/limit_switch_service.c:49:13:ls_closed_exti_handler	2
+../Core/Src/Services/limit_switch_service.c:59:6:LimitSwitchService_Init	1
+../Core/Src/Services/limit_switch_service.c:92:6:LimitSwitchService_ProcessDebounce	5
+../Core/Src/Services/limit_switch_service.c:117:6:LimitSwitchService_IsDoorFullyOpen	1
+../Core/Src/Services/limit_switch_service.c:125:6:LimitSwitchService_IsDoorFullyClosed	1
