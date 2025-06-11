@@ -30,6 +30,7 @@ Mid-level services that provide specific functionality:
 2. **pir_sensor_service**: Processes motion detection with debouncing
 3. **uart_protocol_service**: Implements the communication protocol with LabVIEW
 4. **motor_control_service**: Controls the door motor
+5. **light_control_service**: Controls light
 
 ### Application Layer
 The main application logic is in main.c and integrated with the above services.
@@ -67,7 +68,10 @@ The system communicates with a LabVIEW application using a custom frame-based UA
   - LIGHT_STATE (0x02)
   - PERSON_ COUNT (0x03)
   - SYSTEM_MODE (0x04)
-  - FUUL_SNAPSHOT (0x05)
+  - FULL_SNAPSHOT (0x05)
+
+- **Acknowledge** (STM32 to LabVIEW):
+  - ACK (0x00)  
 
 ### Reliability Features
 - Frame ID tracking
@@ -78,7 +82,7 @@ The system communicates with a LabVIEW application using a custom frame-based UA
 
 ## Operation Modes
 
-1. **Auto Mode**: Door opens automatically when motion is detected and closes after a delay. Lighting is controlled based on people count.
+1. **Auto Mode (Normal)**: Door opens automatically when motion is detected and closes after a delay. Lighting is controlled based on people count.
 
 2. **Force Open**: Door remains open regardless of motion detection.
 
@@ -88,7 +92,7 @@ The system communicates with a LabVIEW application using a custom frame-based UA
 The system tracks and reports the following door states:
 - **OPEN**: Door is fully open
 - **OPENING**: Door is in the process of opening
-- **CLOSEED**: Door is fully closed
+- **CLOSED**: Door is fully closed
 - **CLOSING**: Door is in the process of closing
 - **ERROR**  
 
@@ -98,6 +102,11 @@ The system uses PIR sensors to detect motion and increment/decrement people coun
 - When someone exits, count decreases
 - Count is used to control lighting (lights on when count > 0)
 - The count can be reset via command from LabVIEW
+
+## Lighting Logic
+Relies on People Counting Logic 
+- When people_count > 0, LED ON
+- Otherwise, LED OFF 
 
 ## Project Structure
 
@@ -123,7 +132,7 @@ Core/
   │   └── Applications/
   |       ├── system_manager.h
   |       ├── door_fsm.h
-  |       ├── lightting_logic.h
+  |       ├── lighting_logic.h
   |       └── people_counter.h
   ├── Src/                      # Source files
   │   ├── main.c                # Main application
