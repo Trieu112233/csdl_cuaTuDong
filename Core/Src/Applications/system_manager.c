@@ -115,18 +115,16 @@ void SystemManager_Process(void) {
     g_cur_light_state = LightingLogic_IsLightIntendedToBeOn() ? PAYLOAD_LIGHT_ON : PAYLOAD_LIGHT_OFF;
     g_current_door_state = DoorFSM_GetState();
     
-    if (GetTick() - g_timer_start_tick >= 3000){
+    if (GetTick() - g_timer_start_tick >= 3000) {
+        uint8_t initial_status_payload[4];
+        initial_status_payload[0] = (uint8_t) g_cur_system_op_mode; // Chế độ hệ thống
+        initial_status_payload[1] = (uint8_t) g_current_door_state; // Trạng thái cửa
+        initial_status_payload[2] = g_cur_perCnt; // Số người hiện tại
+        initial_status_payload[3] = g_cur_light_state; // Trạng thái đèn
 
-    uint8_t initial_status_payload[4];
-    initial_status_payload[0] = (uint8_t) g_cur_system_op_mode; // Chế độ hệ thống
-    initial_status_payload[1] = (uint8_t) g_current_door_state; // Trạng thái cửa
-    initial_status_payload[2] = g_cur_perCnt; // Số người hiện tại
-    initial_status_payload[3] = g_cur_light_state; // Trạng thái đèn
-
-    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_FULL_SNAPSHOT, initial_status_payload, 4);
-	g_timer_start_tick = GetTick(); 
+        UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_FULL_SNAPSHOT, initial_status_payload, 4);
+        g_timer_start_tick = GetTick();
     }
-
 }
 
 void SendFrameToLabVIEWProcess(void) {

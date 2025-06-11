@@ -154,7 +154,7 @@ static void process_state_open(bool just_enter_state) {
                                  PIRService_IsMotionDetected(PIR_SENSOR_OUT);
         if (is_person_detected) {
             g_state_timer_start_tick = GetTick();
-        } else if (is_timeout(g_state_timer_start_tick, DOOR_AUTO_CLOSE_TIMEOUT_MS)) {
+        } else if ((GetTick() - g_state_timer_start_tick) > DOOR_AUTO_CLOSE_TIMEOUT_MS) {
             change_door_state(DOOR_STATE_CLOSING);
         }
     }
