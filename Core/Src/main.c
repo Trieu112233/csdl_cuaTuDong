@@ -12,14 +12,16 @@
 int main(void) {
    // Khởi tạo hệ thống
    SystemClock_Config();
-   SysTick_Init();       
+   SysTick_Init();
    SystemManager_Init();
 
    // Vòng lặp chính
    while (1) {
        SystemManager_Process();
+       Delay_ms(100);
    }
 
    return 0;
 }
+
 

@@ -116,7 +116,6 @@ void PeopleCounter_Reset(void) {
     // Critical section
     __disable_irq();
     g_person_count = 0;
-    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PERSON_COUNT, (uint8_t*)&g_person_count, 1);
     g_detection_state = DETECTION_STATE_IDLE; // Reset cả máy trạng thái phát hiện
     g_last_detection_time = GetTick(); // Reset cooldown để lệnh reset có hiệu lực ngay
     __enable_irq();

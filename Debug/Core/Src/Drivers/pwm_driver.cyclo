@@ -1,6 +1,6 @@
 ../Core/Src/Drivers/pwm_driver.c:12:21:get_timer_peripheral	5
 ../Core/Src/Drivers/pwm_driver.c:23:13:pwm_timer_clock_cmd	7
 ../Core/Src/Drivers/pwm_driver.c:45:8:PWM_InitChannel	27
-../Core/Src/Drivers/pwm_driver.c:147:8:PWM_SetDutyCycle	12
-../Core/Src/Drivers/pwm_driver.c:179:8:PWM_Start	2
-../Core/Src/Drivers/pwm_driver.c:188:8:PWM_Stop	2
+../Core/Src/Drivers/pwm_driver.c:144:8:PWM_SetDutyCycle	12
+../Core/Src/Drivers/pwm_driver.c:176:8:PWM_Start	2
+../Core/Src/Drivers/pwm_driver.c:185:8:PWM_Stop	2

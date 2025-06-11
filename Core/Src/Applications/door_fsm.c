@@ -5,6 +5,7 @@
  *      Author: Admin
  */
 
+#include <stdio.h>
 #include "door_fsm.h"
 #include "system_manager.h"
 #include "people_counter.h"
@@ -13,6 +14,7 @@
 #include "motor_control_service.h"
 #include "systick_driver.h"
 
+static float motor_speed = 100.0f;
 static DoorState_t    g_current_door_state = DOOR_STATE_INIT;
 static DoorState_t    g_previous_door_state = DOOR_STATE_INIT; 
 static SystemOpMode_t g_current_system_mode = SYSTEM_MODE_NORMAL;
@@ -27,7 +29,6 @@ static void process_state_error(bool just_enter_state);
 
 static void change_door_state(DoorState_t new_state) {
     if(g_current_door_state != new_state) {
-        g_previous_door_state = g_current_door_state; // Lưu trạng thái cũ
         g_current_door_state = new_state; // Cập nhật trạng thái mới
         g_state_timer_start_tick = GetTick(); // Reset timer khi chuyển trạng thái
     }
@@ -49,21 +50,19 @@ void DoorFSM_Init(void) {
 
 void DoorFSM_Process(void) {
     bool just_enter_state = (g_current_door_state != g_previous_door_state);
-    if(just_enter_state){
-    }
 
-    // Xử lý ưu tiên: nếu đang ở chế độ FORCE_OPEN hoặc FORCE_CLOSE, cần xử lý trước
-    if (g_current_system_mode == SYSTEM_MODE_FORCE_OPEN) {
-        if (g_current_door_state != DOOR_STATE_OPEN && g_current_door_state != DOOR_STATE_OPENING) {
-            if (g_current_door_state != DOOR_STATE_ERROR) { 
-                 change_door_state(DOOR_STATE_OPENING);
+    // Xử lý FORCE mode - chỉ khi không ở ERROR state
+    if (g_current_door_state != DOOR_STATE_ERROR) {
+        if (g_current_system_mode == SYSTEM_MODE_FORCE_OPEN) {
+            if (g_current_door_state != DOOR_STATE_OPEN && g_current_door_state != DOOR_STATE_OPENING) {
+                change_door_state(DOOR_STATE_OPENING);
+                just_enter_state = true; // Update flag vì đã thay đổi state
             }
-        }
-    } else if (g_current_system_mode == SYSTEM_MODE_FORCE_CLOSE) {
-        if (g_current_door_state != DOOR_STATE_CLOSED && g_current_door_state != DOOR_STATE_CLOSING) {
-             if (g_current_door_state != DOOR_STATE_ERROR) {
+        } else if (g_current_system_mode == SYSTEM_MODE_FORCE_CLOSE) {
+            if (g_current_door_state != DOOR_STATE_CLOSED && g_current_door_state != DOOR_STATE_CLOSING) {
                 change_door_state(DOOR_STATE_CLOSING);
-             }
+                just_enter_state = true; // Update flag vì đã thay đổi state
+            }
         }
     }
 
@@ -98,9 +97,8 @@ void DoorFSM_Process(void) {
             process_state_error(just_enter_state);
             break;
     }
-    if (just_enter_state) { // Nếu vừa vào trạng thái mới (được set bởi change_door_state)
-        g_previous_door_state = g_current_door_state; // Đảm bảo previous được cập nhật cho lần Process tiếp theo
-    }
+    
+    g_previous_door_state = g_current_door_state;
 }
 
 DoorState_t DoorFSM_GetState(void) { 
@@ -129,16 +127,12 @@ static void process_state_closed(bool just_enter_state) {
     if (just_enter_state) {
         Motor_Stop();
     }
-
-    if (g_current_system_mode == SYSTEM_MODE_FORCE_OPEN) {
-        change_door_state(DOOR_STATE_OPENING);
-    } 
 }
 
 static void process_state_opening(bool just_enter_state) {
     if (just_enter_state) {
         Motor_SetDirection(MOTOR_FORWARD); // Đặt hướng mở cửa
-        Motor_SetSpeed(100.0f); // Bắt đầu mở cửa
+        Motor_SetSpeed(motor_speed); // Bắt đầu mở cửa
     }
 
     if (LimitSwitchService_IsDoorFullyOpen()) {
@@ -154,16 +148,14 @@ static void process_state_open(bool just_enter_state) {
         g_state_timer_start_tick = GetTick(); // Reset auto-close timer
     }
 
-    if (g_current_system_mode == SYSTEM_MODE_FORCE_CLOSE) {
-        change_door_state(DOOR_STATE_CLOSING);
-    } else if (g_current_system_mode == SYSTEM_MODE_NORMAL) {
-        bool is_person_detected = PIRService_IsMotionDetected(PIR_SENSOR_IN) || PIRService_IsMotionDetected(PIR_SENSOR_OUT);
+    // Chỉ xử lý logic NORMAL mode 
+    if (g_current_system_mode == SYSTEM_MODE_NORMAL) {
+        bool is_person_detected = PIRService_IsMotionDetected(PIR_SENSOR_IN) || 
+                                 PIRService_IsMotionDetected(PIR_SENSOR_OUT);
         if (is_person_detected) {
-            g_state_timer_start_tick = GetTick(); // Reset auto-close timer nếu có người
-        } else {
-            if (GetTick() - g_state_timer_start_tick > DOOR_AUTO_CLOSE_TIMEOUT_MS) {
-            change_door_state(DOOR_STATE_CLOSING); // Tự động đóng cửa sau thời gian quy định
-           }
+            g_state_timer_start_tick = GetTick();
+        } else if (is_timeout(g_state_timer_start_tick, DOOR_AUTO_CLOSE_TIMEOUT_MS)) {
+            change_door_state(DOOR_STATE_CLOSING);
         }
     }
 }
@@ -171,7 +163,7 @@ static void process_state_open(bool just_enter_state) {
 static void process_state_closing(bool just_enter_state) {
     if (just_enter_state) {
         Motor_SetDirection(MOTOR_REVERSE); // Đặt hướng đóng cửa
-        Motor_SetSpeed(100.0f); // Bắt đầu đóng cửa
+        Motor_SetSpeed(motor_speed); // Bắt đầu đóng cửa
     }
 
     if (g_current_system_mode == SYSTEM_MODE_NORMAL) {

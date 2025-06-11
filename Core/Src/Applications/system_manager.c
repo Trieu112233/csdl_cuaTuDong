@@ -35,6 +35,7 @@
 #define MOTOR_DIR1_PIN          8
 #define MOTOR_DIR2_PORT         GPIOB
 #define MOTOR_DIR2_PIN          9
+// PWM: PA6
 
 // Light Control
 #define LIGHT_RELAY_PORT        GPIOA
@@ -47,11 +48,13 @@ static SystemOpMode_t g_cur_system_op_mode = SYSTEM_MODE_NORMAL; // Chế độ 
 static uint8_t g_prev_perCnt = 0;
 static uint8_t g_cur_perCnt = 0;
 
-static bool g_prev_light_state = false;
-static bool g_cur_light_state = false;
+static uint8_t g_prev_light_state = 0;
+static uint8_t g_cur_light_state = 0;
 
 static DoorState_t g_prev_door_state = DOOR_STATE_INIT;
 static DoorState_t g_current_door_state = DOOR_STATE_INIT;
+
+static uint32_t g_timer_start_tick = 0;
 
 // Callback được people_counter gọi khi có người đi qua
 void app_person_passed_handler(PersonPassedDirection_t direction) {
@@ -88,14 +91,16 @@ void SystemManager_Init(void) {
     g_prev_door_state = DoorFSM_GetState();
     g_current_door_state = g_prev_door_state;
 
+    g_timer_start_tick = GetTick();
     // Gửi trạng thái ban đầu của hệ thống
-    uint8_t initial_status_payload[4];
-    initial_status_payload[0] = g_cur_system_op_mode; // Chế độ hệ thống
-    initial_status_payload[1] = g_current_door_state; // Trạng thái cửa
-    initial_status_payload[2] = g_cur_perCnt; // Số người hiện tại
-    initial_status_payload[3] = g_cur_light_state; // Trạng thái đèn
 
-    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_FULL_SNAPSHOT, initial_status_payload, 4);
+    	uint8_t initial_status_payload[4];
+    	initial_status_payload[0] = (uint8_t) g_cur_system_op_mode; // Chế độ hệ thống
+    	initial_status_payload[1] = (uint8_t) g_current_door_state; // Trạng thái cửa
+    	initial_status_payload[2] = g_cur_perCnt; // Số người hiện tại
+    	initial_status_payload[3] = g_cur_light_state; // Trạng thái đèn
+
+    	UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_FULL_SNAPSHOT, initial_status_payload, 4);
 }
 
 void SystemManager_Process(void) {
@@ -105,20 +110,33 @@ void SystemManager_Process(void) {
     DoorFSM_Process();
     LightingLogic_Process();
     SendFrameToLabVIEWProcess();
-}
 
-void SendFrameToLabVIEWProcess(void) {
     g_cur_perCnt = PeopleCounter_GetCount();
     g_cur_light_state = LightingLogic_IsLightIntendedToBeOn() ? PAYLOAD_LIGHT_ON : PAYLOAD_LIGHT_OFF;
     g_current_door_state = DoorFSM_GetState();
+    
+    if (GetTick() - g_timer_start_tick >= 3000){
 
+    uint8_t initial_status_payload[4];
+    initial_status_payload[0] = (uint8_t) g_cur_system_op_mode; // Chế độ hệ thống
+    initial_status_payload[1] = (uint8_t) g_current_door_state; // Trạng thái cửa
+    initial_status_payload[2] = g_cur_perCnt; // Số người hiện tại
+    initial_status_payload[3] = g_cur_light_state; // Trạng thái đèn
+
+    UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_FULL_SNAPSHOT, initial_status_payload, 4);
+	g_timer_start_tick = GetTick(); 
+    }
+
+}
+
+void SendFrameToLabVIEWProcess(void) {
     // Chỉ gửi frame nếu có thay đổi
     if (g_current_door_state != g_prev_door_state)  {
         UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_DOOR_STATE, 
                             (uint8_t*)&g_current_door_state, 1);
         // Cập nhật trạng thái cũ
         g_prev_door_state = g_current_door_state;
-    }
+    } 
 
     if (g_cur_perCnt != g_prev_perCnt) {
         UARTProto_SendFrame(FRAME_TYPE_STM_TO_LABVIEW, FRAME_ID_STM_PERSON_COUNT,
