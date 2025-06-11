@@ -13,7 +13,7 @@
 #include "pir_sensor_service.h"
 
 // Thời gian tối đa (ms) giữa việc kích hoạt 2 PIR để được coi là một lượt di chuyển hợp lệ
-#define PERSON_COUNTER_MAX_TRANSITION_TIME_MS  1500
+#define PERSON_COUNTER_MAX_TRANSITION_TIME_MS  10000
 
 // Thời gian "cooldown" sau khi một người được đếm
 #define PERSON_COUNTER_COOLDOWN_MS             2000
@@ -26,15 +26,12 @@ typedef enum {
     PERSON_PASSED_EXITED
 } PersonPassedDirection_t;
 
-typedef void (*person_passed_callback_t)(PersonPassedDirection_t direction);
-
-
 /**
  * @brief Initializes the People Counter module.
  * @param callback: Optional callback function to be called when a person is detected passing.
  *                  Pass NULL if no callback is needed.
  */
-void PeopleCounter_Init(person_passed_callback_t callback);
+void PeopleCounter_Init(void);
 
 /**
  * @brief Processes the PIR sensor states to detect direction and update count.

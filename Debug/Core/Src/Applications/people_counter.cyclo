@@ -1,4 +1,5 @@
-../Core/Src/Applications/people_counter.c:31:6:PeopleCounter_Init	1
-../Core/Src/Applications/people_counter.c:43:6:PeopleCounter_Process	23
-../Core/Src/Applications/people_counter.c:111:9:PeopleCounter_GetCount	1
-../Core/Src/Applications/people_counter.c:115:6:PeopleCounter_Reset	1
+../Core/Src/Applications/people_counter.c:29:13:is_timeout_pc	3
+../Core/Src/Applications/people_counter.c:40:6:PeopleCounter_Init	1
+../Core/Src/Applications/people_counter.c:51:6:PeopleCounter_Process	18
+../Core/Src/Applications/people_counter.c:110:9:PeopleCounter_GetCount	1
+../Core/Src/Applications/people_counter.c:114:6:PeopleCounter_Reset	1

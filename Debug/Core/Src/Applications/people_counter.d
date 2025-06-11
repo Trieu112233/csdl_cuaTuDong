@@ -11,8 +11,7 @@ Core/Src/Applications/people_counter.o: \
  ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h \
  C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/exti_driver.h \
  C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/gpio_driver.h \
- C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/systick_driver.h \
- C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Services/uart_protocol_service.h
+ C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/systick_driver.h
 C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Applications/people_counter.h:
 C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Services/pir_sensor_service.h:
 ../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f401xe.h:
@@ -25,4 +24,3 @@ C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Services/pir_sen
 C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/exti_driver.h:
 C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/gpio_driver.h:
 C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Drivers/systick_driver.h:
-C:/Users/Admin/STM32CubeIDE/workspace_1.17.0/cuaTuDong/Core/Inc/Services/uart_protocol_service.h:

@@ -18,7 +18,7 @@ int main(void) {
    // Vòng lặp chính
    while (1) {
        SystemManager_Process();
-       Delay_ms(100);
+       Delay_ms(200);
    }
 
    return 0;

@@ -8,28 +8,24 @@
 #include "lighting_logic.h"
 #include "people_counter.h"
 #include "light_control_service.h"
-#include "uart_protocol_service.h"
 
 void LightingLogic_Init(void) {
-    int16_t current_person_count = PeopleCounter_GetCount();
-
-    if (current_person_count > 0) {
-        LightService_TurnOn();
-    } else {
-        LightService_TurnOff();
-    }
+    // Trạng thái ban đầu của đèn sẽ được quyết định bởi PeopleCounter_GetCount()
+    // và được LightService_TurnOn/Off xử lý.
+    // Gọi Process một lần để đảm bảo trạng thái đèn đúng sau khi các module khác đã Init.
+    LightingLogic_Process();
 }
 
 void LightingLogic_Process(void) {
-    int16_t current_person_count = PeopleCounter_GetCount();
-    bool current_light_hw_state = LightService_GetState(); // Lấy trạng thái thực tế của đèn từ service
+    uint8_t current_person_count = PeopleCounter_GetCount();
+    bool is_light_currently_on_hw = LightService_GetState(); // Lấy trạng thái thực tế của đèn từ service
 
     if (current_person_count > 0) {
-        if (!current_light_hw_state) {
+        if (!is_light_currently_on_hw) {
             LightService_TurnOn();
         }
     } else {
-        if (current_light_hw_state) {
+        if (is_light_currently_on_hw) {
             LightService_TurnOff();
         }
     }

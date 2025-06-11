@@ -16,7 +16,7 @@
 typedef enum {
     PIR_SENSOR_IN = 0, //PIR ở trong
     PIR_SENSOR_OUT = 1, //PIR ở ngoài
-    PIR_SENSOR_COUNT // Số lượng cảm biến PIR
+    PIR_SENSOR_COUNT = 2// Số lượng cảm biến PIR
 } PIR_SensorID_t;
 
 void PIRService_Init(GPIO_TypeDef* pir1_port, uint8_t pir1_pin_number,
